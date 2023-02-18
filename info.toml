@@ -1,5 +1,5 @@
 [meta]
-name = "Run History"
-author = "Vanawy"
-category = "Testing"
-version = "0.0.1"
+name        = "Run History"
+author      = "Vanawy"
+category    = "Overlay"
+version     = "0.1.0"
