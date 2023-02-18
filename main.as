@@ -13,6 +13,9 @@ int deltaWidth = 60;
 
 array<Record> records;
 
+const string authorText = "\\$071" + Icons::Circle;
+const string pbText = "\\$0ff" + Icons::User;
+
 void AddTime(uint time) {
     uint count = records.Length;
     records.Resize(count + 1);
@@ -59,8 +62,8 @@ class Record {
 }
 
 
-Record@ author = Record("AT", 0);
-Record@ pb = Record("PB", 0);
+Record@ author = Record(authorText, 0);
+Record@ pb = Record(pbText, 0);
 
 array<Record@> targets = {pb, author};
 uint currentTarget = 0;
@@ -112,7 +115,7 @@ void Main()
                     pb.hidden = true;
                     author.hidden = false;
                     print("PB: " + Time::Format(pbTime));
-                    if (pb.time - author.time > 0) {
+                    if (pb.time < author.time) {
                         pb.hidden = false;
                         author.hidden = true;
                     }
@@ -166,7 +169,7 @@ void Render() {
         
             UI::TableNextColumn();
             // setMinWidth(0);
-            UI::Text("#" + recordsLimit);
+            UI::Text("#");
             
             UI::TableNextColumn();
             // setMinWidth(timeWidth);
