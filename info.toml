@@ -6,3 +6,4 @@ version     = "0.2.1"
 
 [script]
 dependencies = ["MLHook", "MLFeedRaceData"]
+optional_dependencies = ["ChampionMedals"]

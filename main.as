@@ -7,8 +7,21 @@ vec2 anchor = vec2(0, 170);
 [Setting category="Display" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
 bool lockPosition = false;
 
-
 string pluginName = "RunHistory";
+
+[SettingsTab name="Feedback" icon="Bug"]
+void RenderSettings()
+{
+    UI::Text("Thank you for using " + pluginName + "!");
+    UI::Text("To report issues or send feedback use buttons below " + "\\$f69" + Icons::Heart);
+
+    if (UI::Button("GitHub " + Icons::Github)) {
+        OpenBrowserURL("https://github.com/Vanawy/tm-run-history/issues");
+    }
+    if (UI::Button("Twitter " + Icons::Twitter)) {
+        OpenBrowserURL("https://twitter.com/vanawy");
+    }
+}
 
 array<Record> records;
 
@@ -18,9 +31,9 @@ array<string> colors = {
     "\\$899", // silver medal
     "\\$db4", // gold medal
     "\\$071", // author medal
-    #if DEPENDENCY_CHAMPIONMEDALS
-        "\\$f69", // champion medal
-    #endif
+#if DEPENDENCY_CHAMPIONMEDALS
+    "\\$f69", // champion medal
+#endif
 };
 
 const string MEDAL_ICON = Icons::Circle;
@@ -31,7 +44,7 @@ void AddTime(int time, string &in title = "") {
     int count = records.Length;
     records.Resize(count + 1);
     records[count].time = time;
-    if (records[count].time > pb.time) {
+    if (time < pb.time) {
         title = "PB";
     }
     records[count].title = title;
@@ -93,51 +106,24 @@ Record@ bronze  = Record(colors[0] + MEDAL_ICON);
 Record@ silver  = Record(colors[1] + MEDAL_ICON);
 Record@ gold    = Record(colors[2] + MEDAL_ICON);
 Record@ author  = Record(colors[3] + MEDAL_ICON);
+#if DEPENDENCY_CHAMPIONMEDALS
+Record@ champion  = Record(colors[4] + MEDAL_ICON);
+#endif
 
 Record@ pb = Record(PB_TEXT, 0);
 
 array<Record@> targets = {
-    bronze,
-    silver,
-    gold,
+    pb,
+#if DEPENDENCY_CHAMPIONMEDALS
+    champion,
+#endif
     author,
-    pb
+    gold,
+    silver,
+    bronze
 };
 
-Record@ currentTarget = bronze;
-
-uint authorTime = 0;
-uint pbTime = 0;
-
-// void RenderMenu()
-// {
-//   if (UI::MenuItem("\\$f00" + Icons::Circle + "\\$fff My first menu item!")) {
-//     print("You clicked me!!");
-//   }
-// }
-
-void Update(float  dt)
-{
-    UpdateTargets();
-}
-
-void UpdateTargets()
-{
-    currentTarget = author;
-    for(uint i = 0; i < targets.Length; i++) {
-        int time = targets[i].time;
-        if (time > 0 && time < pb.time && time > currentTarget.time) {
-            currentTarget = targets[i];
-        }
-    }
-    if (currentTarget.time > pb.time) {
-        currentTarget = pb;
-    }
-    for (uint i = 0; i < targets.Length; i++) {
-        targets[i].hidden = true;
-    }
-    currentTarget.hidden = false;
-}
+Record@ currentTarget = null;
 
 void Render() {
     auto app = cast<CTrackMania@>(GetApp());
@@ -157,7 +143,7 @@ void Render() {
         
         int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
         if (!UI::IsOverlayShown()) {
-                windowFlags |= UI::WindowFlags::NoInputs;
+            windowFlags |= UI::WindowFlags::NoInputs;
         }
 
         UI::Begin("Run History", windowFlags);
@@ -170,16 +156,6 @@ void Render() {
 
         uint numCols = 3; 
         if(UI::BeginTable(pluginName, numCols, UI::TableFlags::SizingFixedFit)) {
-            UI::TableNextRow();
-        
-            UI::TableNextColumn();
-            UI::Text("#");
-            
-            UI::TableNextColumn();
-            UI::Text("Time");
-            
-            UI::TableNextColumn();
-            UI::Text("Delta");
             
             for(uint i = 0; i < targets.Length; i++) {
                 if(targets[i].hidden) {
@@ -194,7 +170,9 @@ void Render() {
                 targets[i].DrawTime();
 
                 UI::TableNextColumn();
+                if (@targets[i] == @currentTarget) {
                 UI::Text(Icons::Flag);
+                }
             }
 
             UI::TableNextRow();
@@ -235,8 +213,14 @@ void Main() {
     string lastMapId = "";
     string lastGhostId = "";
 
+#if DEPENDENCY_CHAMPIONMEDALS
+    print("ChampionMedals detected");
+#else
+    warn("ChampionMedals not installed");
+#endif
+
     while(true) {
-        yield();
+        sleep(1000);
 
         auto gd = MLFeed::GetGhostData();
         if (gd !is null && gd.Ghosts_V2 !is null && gd.NbGhosts != 0) {
@@ -258,24 +242,49 @@ void Main() {
     }
 }
 
+void UpdateTargets()
+{
+    @currentTarget = targets[1];
+    for(uint i = 2; i < targets.Length; i++) {
+        if (currentTarget.time < 1 || (targets[i].time > 0 && (targets[i].time < pb.time || pb.time < 1) && targets[i].time > currentTarget.time)) {
+            @currentTarget = @targets[i];
+        }
+    }
+    if (pb.time > 0 && currentTarget.time > pb.time) {
+        @currentTarget = @pb;
+    }
+    for (uint i = 0; i < targets.Length; i++) {
+        targets[i].hidden = true;
+    }
+    currentTarget.hidden = false;
+}
+
+string BoolToStr(bool value) {
+    return value ? ("\\$0f0" + Icons::Check) : ("\\$f00" + Icons::Times);
+}
+
 void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost) {
     int lastTime = ghost.Result_Time;
     AddTime(lastTime);
-    if (lastTime < pb.time) {
+    if (pb.time < 1 || lastTime < pb.time) {
         pb.time = lastTime;
     }
+    UpdateTargets();
 }
 
 void OnMapChange(CGameCtnChallenge@ map) {
     ClearRecords();
 
-    authorTime = map.TMObjective_AuthorTime;
-    author.time = authorTime;
-    print("AT detected: " + Time::Format(authorTime));
+    author.time = map.TMObjective_AuthorTime;
+    print("AT detected: " + Time::Format(author.time));
 
     bronze.time = map.TMObjective_BronzeTime;
     silver.time = map.TMObjective_SilverTime;
     gold.time   = map.TMObjective_GoldTime;
+#if DEPENDENCY_CHAMPIONMEDALS
+    champion.time = ChampionMedals::GetCMTime();
+    print("Champion Medal detected: " + Time::Format(champion.time));
+#endif
 
     auto app = cast<CTrackMania@>(GetApp());
     auto network = app.Network;
@@ -290,10 +299,12 @@ void OnMapChange(CGameCtnChallenge@ map) {
         
         auto scoreMgr = network.ClientManiaAppPlayground.ScoreMgr;
         uint newPbTime = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
-        if (newPbTime != pbTime) {
-            pbTime = newPbTime;
-            pb.time = pbTime;
-            print("PB detected: " + Time::Format(pbTime));
+        if (newPbTime != 0) {
+            pb.time = newPbTime;
+            print("PB detected: " + Time::Format(pb.time));
         }
     }
+
+    UpdateTargets();
 }
+
