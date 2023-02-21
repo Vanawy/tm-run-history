@@ -10,7 +10,6 @@ bool lockPosition = false;
 
 string pluginName = "RunHistory";
 
-
 array<Record> records;
 
 
@@ -19,6 +18,9 @@ array<string> colors = {
     "\\$899", // silver medal
     "\\$db4", // gold medal
     "\\$071", // author medal
+    #if DEPENDENCY_CHAMPIONMEDALS
+        "\\$f69", // champion medal
+    #endif
 };
 
 const string MEDAL_ICON = Icons::Circle;
@@ -48,41 +50,41 @@ void ClearRecords()
 }
 
 class Record {
-	string title;
+    string title;
     int time;
-	string style;
-	bool hidden;
+    string style;
+    bool hidden;
 
     Record(){}
-	
-	Record(string &in title, int time = -1, string &in style = "\\$fff") {
+    
+    Record(string &in title, int time = -1, string &in style = "\\$fff") {
         this.title = title;
-		this.time = time;
-		this.style = style;
+        this.time = time;
+        this.style = style;
         this.hidden = false;
-	}
+    }
 
     void DrawTitle() {
         UI::Text(this.style + this.title);
     }
 
-	void DrawTime() {
-		UI::Text(this.style + (this.time > 0 ? Time::Format(this.time) : "-:--.---"));
-	}
+    void DrawTime() {
+        UI::Text(this.style + (this.time > 0 ? Time::Format(this.time) : "-:--.---"));
+    }
     
-	void DrawDelta(Record@ other) {
-		int delta = other.time - this.time;
-		if (delta < 0) {
-			UI::Text("\\$7f7" + "New PB");
-		} else if (delta >= 0) {
+    void DrawDelta(Record@ other) {
+        int delta = other.time - this.time;
+        if (delta < 0) {
+            UI::Text("\\$7f7" + "New PB");
+        } else if (delta >= 0) {
             string color = "f77";
             if (delta < 100) {
                 color = "fc0";
             } else if (delta < 500) {
                 color = "fa3";
             }
-			UI::Text("\\$" + color + "+" + Time::Format(delta));
-		}
+            UI::Text("\\$" + color + "+" + Time::Format(delta));
+        }
     }
 }
 
@@ -138,36 +140,36 @@ void UpdateTargets()
 }
 
 void Render() {
-	auto app = cast<CTrackMania@>(GetApp());
-	
-	auto map = app.RootMap;
-	
-	if(!UI::IsGameUIVisible()) {
-		return;
-	}
-	
-	if(map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
-		if(lockPosition) {
-			UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::Always);
-		} else {
-			UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::FirstUseEver);
-		}
-		
-		int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
+    auto app = cast<CTrackMania@>(GetApp());
+    
+    auto map = app.RootMap;
+    
+    if(!UI::IsGameUIVisible()) {
+        return;
+    }
+    
+    if(map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
+        if(lockPosition) {
+            UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::Always);
+        } else {
+            UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::FirstUseEver);
+        }
+        
+        int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
         if (!UI::IsOverlayShown()) {
-				windowFlags |= UI::WindowFlags::NoInputs;
-		}
+                windowFlags |= UI::WindowFlags::NoInputs;
+        }
 
-		UI::Begin("Run History", windowFlags);
-		
-		if(!lockPosition) {
-			anchor = UI::GetWindowPos();
-		}
-		
-		UI::BeginGroup();
+        UI::Begin("Run History", windowFlags);
+        
+        if(!lockPosition) {
+            anchor = UI::GetWindowPos();
+        }
+        
+        UI::BeginGroup();
 
-		uint numCols = 3; 
-		if(UI::BeginTable(pluginName, numCols, UI::TableFlags::SizingFixedFit)) {
+        uint numCols = 3; 
+        if(UI::BeginTable(pluginName, numCols, UI::TableFlags::SizingFixedFit)) {
             UI::TableNextRow();
         
             UI::TableNextColumn();
@@ -178,55 +180,55 @@ void Render() {
             
             UI::TableNextColumn();
             UI::Text("Delta");
-			
-			for(uint i = 0; i < targets.Length; i++) {
-				if(targets[i].hidden) {
-					continue;
-				}
-				UI::TableNextRow();
-				
-				UI::TableNextColumn();
-				targets[i].DrawTitle();
-				
-				UI::TableNextColumn();
-				targets[i].DrawTime();
+            
+            for(uint i = 0; i < targets.Length; i++) {
+                if(targets[i].hidden) {
+                    continue;
+                }
+                UI::TableNextRow();
+                
+                UI::TableNextColumn();
+                targets[i].DrawTitle();
+                
+                UI::TableNextColumn();
+                targets[i].DrawTime();
 
                 UI::TableNextColumn();
                 UI::Text(Icons::Flag);
-			}
+            }
 
             UI::TableNextRow();
-			for(uint i = 0; i < numCols; i++) {
+            for(uint i = 0; i < numCols; i++) {
                 UI::TableNextColumn();
                 UI::Separator();
             }
 
-			for(uint i = 0; i < records.Length; i++) {
-				if(records[i].hidden) {
-					continue;
-				}
-				UI::TableNextRow();
-				
-				UI::TableNextColumn();
+            for(uint i = 0; i < records.Length; i++) {
+                if(records[i].hidden) {
+                    continue;
+                }
+                UI::TableNextRow();
+                
+                UI::TableNextColumn();
                 if (records[i].title.Length > 0) {
                     records[i].DrawTitle();
                 } else {
-				    UI::Text("" + (i + 1));
+                    UI::Text("" + (i + 1));
                 }
-				
-				UI::TableNextColumn();
-				records[i].DrawTime();
+                
+                UI::TableNextColumn();
+                records[i].DrawTime();
 
                 UI::TableNextColumn();
                 currentTarget.DrawDelta(records[i]);
-			}
-			
-			UI::EndTable();
-		}
-		UI::EndGroup();
-		
-		UI::End();
-	}
+            }
+            
+            UI::EndTable();
+        }
+        UI::EndGroup();
+        
+        UI::End();
+    }
 }
 
 void Main() {
