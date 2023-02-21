@@ -13,13 +13,25 @@ string pluginName = "RunHistory";
 
 array<Record> records;
 
-const string authorText = "\\$071" + Icons::Circle;
-const string pbText = "\\$0ff" + Icons::User;
+
+array<string> colors = {
+    "\\$964", // bronze medal
+    "\\$899", // silver medal
+    "\\$db4", // gold medal
+    "\\$071", // author medal
+};
+
+const string MEDAL_ICON = Icons::Circle;
+
+const string PB_TEXT = "\\$0ff" + Icons::User;
 
 void AddTime(int time, string &in title = "") {
     int count = records.Length;
     records.Resize(count + 1);
     records[count].time = time;
+    if (records[count].time > pb.time) {
+        title = "PB";
+    }
     records[count].title = title;
     count = records.Length;
     for (int i = 0; i < count; i++) {
@@ -75,11 +87,22 @@ class Record {
 }
 
 
-Record@ author = Record(authorText, 0);
-Record@ pb = Record(pbText, 0);
+Record@ bronze  = Record(colors[0] + MEDAL_ICON);
+Record@ silver  = Record(colors[1] + MEDAL_ICON);
+Record@ gold    = Record(colors[2] + MEDAL_ICON);
+Record@ author  = Record(colors[3] + MEDAL_ICON);
 
-array<Record@> targets = {pb, author};
-uint currentTarget = 0;
+Record@ pb = Record(PB_TEXT, 0);
+
+array<Record@> targets = {
+    bronze,
+    silver,
+    gold,
+    author,
+    pb
+};
+
+Record@ currentTarget = bronze;
 
 uint authorTime = 0;
 uint pbTime = 0;
@@ -91,6 +114,28 @@ uint pbTime = 0;
 //   }
 // }
 
+void Update(float  dt)
+{
+    UpdateTargets();
+}
+
+void UpdateTargets()
+{
+    currentTarget = author;
+    for(uint i = 0; i < targets.Length; i++) {
+        int time = targets[i].time;
+        if (time > 0 && time < pb.time && time > currentTarget.time) {
+            currentTarget = targets[i];
+        }
+    }
+    if (currentTarget.time > pb.time) {
+        currentTarget = pb;
+    }
+    for (uint i = 0; i < targets.Length; i++) {
+        targets[i].hidden = true;
+    }
+    currentTarget.hidden = false;
+}
 
 void Render() {
 	auto app = cast<CTrackMania@>(GetApp());
@@ -173,7 +218,7 @@ void Render() {
 				records[i].DrawTime();
 
                 UI::TableNextColumn();
-                targets[currentTarget].DrawDelta(records[i]);
+                currentTarget.DrawDelta(records[i]);
 			}
 			
 			UI::EndTable();
@@ -212,8 +257,11 @@ void Main() {
 }
 
 void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost) {
-    AddTime(ghost.Result_Time);
-
+    int lastTime = ghost.Result_Time;
+    AddTime(lastTime);
+    if (lastTime < pb.time) {
+        pb.time = lastTime;
+    }
 }
 
 void OnMapChange(CGameCtnChallenge@ map) {
@@ -223,9 +271,10 @@ void OnMapChange(CGameCtnChallenge@ map) {
     author.time = authorTime;
     print("AT detected: " + Time::Format(authorTime));
 
-    author.hidden = false;
-    pb.hidden = true;
-        
+    bronze.time = map.TMObjective_BronzeTime;
+    silver.time = map.TMObjective_SilverTime;
+    gold.time   = map.TMObjective_GoldTime;
+
     auto app = cast<CTrackMania@>(GetApp());
     auto network = app.Network;
     if(network.ClientManiaAppPlayground !is null) {
@@ -239,15 +288,10 @@ void OnMapChange(CGameCtnChallenge@ map) {
         
         auto scoreMgr = network.ClientManiaAppPlayground.ScoreMgr;
         uint newPbTime = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
-        
         if (newPbTime != pbTime) {
             pbTime = newPbTime;
             pb.time = pbTime;
             print("PB detected: " + Time::Format(pbTime));
-            if (pb.time < author.time) {
-                pb.hidden = false;
-                author.hidden = true;
-            }
         }
     }
 }
