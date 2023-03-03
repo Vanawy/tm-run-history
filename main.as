@@ -239,8 +239,23 @@ void Main() {
                 OnMapChange(map);
             }
         }
+
+#if DEPENDENCY_CHAMPIONMEDALS
+        UpdateChampionTime();
+#endif
     }
 }
+
+#if DEPENDENCY_CHAMPIONMEDALS
+void UpdateChampionTime() {
+    auto newTime = ChampionMedals::GetCMTime();
+    if (champion.time != newTime) {
+        champion.time = newTime;
+        print("Champion Medal detected: " + Time::Format(champion.time));
+        UpdateTargets();
+    }
+}
+#endif
 
 void UpdateTargets()
 {
@@ -282,8 +297,7 @@ void OnMapChange(CGameCtnChallenge@ map) {
     silver.time = map.TMObjective_SilverTime;
     gold.time   = map.TMObjective_GoldTime;
 #if DEPENDENCY_CHAMPIONMEDALS
-    champion.time = ChampionMedals::GetCMTime();
-    print("Champion Medal detected: " + Time::Format(champion.time));
+    champion.time = 0;
 #endif
 
     auto app = cast<CTrackMania@>(GetApp());
