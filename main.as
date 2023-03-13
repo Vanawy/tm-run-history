@@ -279,6 +279,9 @@ string BoolToStr(bool value) {
 }
 
 void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost) {
+    if (!ghost.IsLocalPlayer || ghost.IsPersonalBest) {
+        return;
+    }
     int lastTime = ghost.Result_Time;
     AddTime(lastTime);
     if (pb.time < 1 || lastTime < pb.time) {
