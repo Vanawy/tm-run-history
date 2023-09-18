@@ -30,6 +30,7 @@ void RenderSettings()
 
 void RenderChangeTargetPopup()
 {
+    if (!UI::IsOverlayShown()) return;
     if (UI::BeginPopup(POPUP_CHANGE_TARGET)) {
         string text = currentTarget.style + currentTarget.title + currentTarget.FormattedTime();
         if (UI::BeginCombo("Target", text)) {
@@ -37,21 +38,18 @@ void RenderChangeTargetPopup()
                 Record @target = @targets[i];
                 if (target.time == 0) {
                     continue;
-                }
-                // targets[i].DrawTime();
-                // if () {
-                //     UI::Text(Icons::Flag);
-                // }
-            
+                }            
                 if (UI::Selectable(target.style + target.title + target.FormattedTime(), @target == @currentTarget)) {
                     print("Target change " + target.title);
                     autoChangeTarget = false;
                     SetTarget(target);
+                    UI::CloseCurrentPopup();
                 }
             }
             
             UI::EndCombo();
         }
+        autoChangeTarget = UI::Checkbox("Auto change target", autoChangeTarget);
         UI::EndPopup();
     }
 }
@@ -129,7 +127,7 @@ class Record {
         string color = "f77";
         string sign = "+";
         if (delta < 0) {
-            color = "0a0";
+            color = "070";
             sign = "-";
             delta *= -1;
         } else if (delta < 100) {
