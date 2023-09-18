@@ -171,7 +171,7 @@ void Render() {
 
                 UI::TableNextColumn();
                 if (@targets[i] == @currentTarget) {
-                UI::Text(Icons::Flag);
+                    UI::Text(Icons::Flag);
                 }
             }
 
@@ -199,9 +199,15 @@ void Render() {
 
                 UI::TableNextColumn();
                 currentTarget.DrawDelta(records[i]);
-            }
-            
+            };
             UI::EndTable();
+            
+            if (UI::IsOverlayShown()) {
+                UI::Columns(1);
+                if (UI::Button("Clear history")) {
+                    OnClearHistory();
+                }
+            }
         }
         UI::EndGroup();
         
@@ -323,5 +329,9 @@ void OnMapChange(CGameCtnChallenge@ map) {
     }
 
     UpdateTargets();
+}
+
+void OnClearHistory() {
+    records.Resize(0);
 }
 
