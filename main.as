@@ -32,15 +32,15 @@ void RenderChangeTargetPopup()
 {
     if (!UI::IsOverlayShown()) return;
     if (UI::BeginPopup(POPUP_CHANGE_TARGET)) {
-        string text = currentTarget.style + currentTarget.title + currentTarget.FormattedTime();
+        string text = currentTarget.style + currentTarget.icon + currentTarget.FormattedTime();
         if (UI::BeginCombo("Target", text)) {
             for(uint i = 0; i < targets.Length; i++) {
                 Record @target = @targets[i];
                 if (target.time == 0) {
                     continue;
                 }            
-                if (UI::Selectable(target.style + target.title + target.FormattedTime(), @target == @currentTarget)) {
-                    print("Target change " + target.title);
+                if (UI::Selectable(target.style + target.icon + target.FormattedTime(), @target == @currentTarget)) {
+                    print("Target change " + target.icon);
                     autoChangeTarget = false;
                     SetTarget(target);
                     UI::CloseCurrentPopup();
@@ -80,7 +80,7 @@ void AddTime(int time, string &in title = "") {
     if (time < pb.time) {
         title = "PB";
     }
-    records[count].title = title;
+    records[count].icon = title;
     count = records.Length;
     for (int i = 0; i < count; i++) {
         records[i].hidden = false;
@@ -96,22 +96,22 @@ void ClearRecords()
 }
 
 class Record {
-    string title;
+    string icon;
     int time;
     string style;
     bool hidden;
 
     Record(){}
     
-    Record(string &in title, int time = -1, string &in style = "\\$fff") {
-        this.title = title;
+    Record(string &in icon, int time = -1, string &in style = "\\$fff") {
+        this.icon = icon;
         this.time = time;
         this.style = style;
         this.hidden = false;
     }
 
-    void DrawTitle() {
-        UI::Text(this.style + this.title);
+    void DrawIcon() {
+        UI::Text(this.style + this.icon);
     }
 
     void DrawTime() {
@@ -203,7 +203,7 @@ void Render() {
                 UI::TableNextRow();
                 
                 UI::TableNextColumn();
-                targets[i].DrawTitle();
+                targets[i].DrawIcon();
                 
                 UI::TableNextColumn();
                 targets[i].DrawTime();
@@ -227,8 +227,8 @@ void Render() {
                 UI::TableNextRow();
                 
                 UI::TableNextColumn();
-                if (records[i].title.Length > 0) {
-                    records[i].DrawTitle();
+                if (records[i].icon.Length > 0) {
+                    records[i].DrawIcon();
                 } else {
                     UI::Text("" + (i + 1));
                 }
@@ -327,7 +327,7 @@ void UpdateTargets()
 
 void SetTarget(Record @target) {
     @currentTarget = target;
-    print(target.title);
+    print(target.icon);
     for (uint i = 0; i < targets.Length; i++) {
         targets[i].hidden = true;
     }
