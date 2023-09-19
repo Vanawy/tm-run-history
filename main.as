@@ -14,6 +14,8 @@ bool autoChangeTarget = true;
 
 string pluginName = "RunHistory";
 
+const string TEXT_DEFAULT_TARGET = "Default (closest target)"; 
+
 [SettingsTab name="Feedback" icon="Bug"]
 void RenderSettings()
 {
@@ -32,8 +34,16 @@ void RenderChangeTargetPopup()
 {
     if (!UI::IsOverlayShown()) return;
     if (UI::BeginPopup(POPUP_CHANGE_TARGET)) {
-        string text = currentTarget.style + currentTarget.icon + currentTarget.FormattedTime();
+        string text = TEXT_DEFAULT_TARGET;
+        if (!autoChangeTarget && currentTarget != null) {
+            text = currentTarget.style + currentTarget.icon + currentTarget.FormattedTime();
+        }
         if (UI::BeginCombo("Target", text)) {
+            if (UI::Selectable(TEXT_DEFAULT_TARGET, autoChangeTarget)) {
+                autoChangeTarget = true;
+                UpdateTargets();
+                UI::CloseCurrentPopup();
+            }
             for(uint i = 0; i < targets.Length; i++) {
                 Record @target = @targets[i];
                 if (target.time == 0) {
@@ -49,7 +59,7 @@ void RenderChangeTargetPopup()
             
             UI::EndCombo();
         }
-        autoChangeTarget = UI::Checkbox("Auto change target", autoChangeTarget);
+        // autoChangeTarget = UI::Checkbox("Auto change target", autoChangeTarget);
         UI::EndPopup();
     }
 }
