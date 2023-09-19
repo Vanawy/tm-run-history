@@ -7,7 +7,14 @@ vec2 anchor = vec2(0, 170);
 [Setting category="Display" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
 bool lockPosition = false;
 
+
+bool autoChangeTarget = true;
+
+// [Settings category="Target time" name=""]
+
 string pluginName = "RunHistory";
+
+const string TEXT_DEFAULT_TARGET = "Default (closest target)"; 
 
 [SettingsTab name="Feedback" icon="Bug"]
 void RenderSettings()
@@ -20,6 +27,40 @@ void RenderSettings()
     }
     if (UI::Button("Twitter " + Icons::Twitter)) {
         OpenBrowserURL("https://twitter.com/vanawy");
+    }
+}
+
+void RenderChangeTargetPopup()
+{
+    if (!UI::IsOverlayShown()) return;
+    if (UI::BeginPopup(POPUP_CHANGE_TARGET)) {
+        string text = TEXT_DEFAULT_TARGET;
+        if (!autoChangeTarget && currentTarget != null) {
+            text = currentTarget.style + currentTarget.icon + currentTarget.FormattedTime();
+        }
+        if (UI::BeginCombo("Target", text)) {
+            if (UI::Selectable(TEXT_DEFAULT_TARGET, autoChangeTarget)) {
+                autoChangeTarget = true;
+                UpdateTargets();
+                UI::CloseCurrentPopup();
+            }
+            for(uint i = 0; i < targets.Length; i++) {
+                Record @target = @targets[i];
+                if (target.time == 0) {
+                    continue;
+                }            
+                if (UI::Selectable(target.style + target.icon + target.FormattedTime(), @target == @currentTarget)) {
+                    print("Target change " + target.icon);
+                    autoChangeTarget = false;
+                    SetTarget(target);
+                    UI::CloseCurrentPopup();
+                }
+            }
+            
+            UI::EndCombo();
+        }
+        // autoChangeTarget = UI::Checkbox("Auto change target", autoChangeTarget);
+        UI::EndPopup();
     }
 }
 
@@ -40,6 +81,8 @@ const string MEDAL_ICON = Icons::Circle;
 
 const string PB_TEXT = "\\$0ff" + Icons::User;
 
+const string POPUP_CHANGE_TARGET = "ChangeTarget";
+
 void AddTime(int time, string &in title = "") {
     int count = records.Length;
     records.Resize(count + 1);
@@ -47,7 +90,7 @@ void AddTime(int time, string &in title = "") {
     if (time < pb.time) {
         title = "PB";
     }
-    records[count].title = title;
+    records[count].icon = title;
     count = records.Length;
     for (int i = 0; i < count; i++) {
         records[i].hidden = false;
@@ -63,41 +106,46 @@ void ClearRecords()
 }
 
 class Record {
-    string title;
+    string icon;
     int time;
     string style;
     bool hidden;
 
     Record(){}
     
-    Record(string &in title, int time = -1, string &in style = "\\$fff") {
-        this.title = title;
+    Record(string &in icon, int time = -1, string &in style = "\\$fff") {
+        this.icon = icon;
         this.time = time;
         this.style = style;
         this.hidden = false;
     }
 
-    void DrawTitle() {
-        UI::Text(this.style + this.title);
+    void DrawIcon() {
+        UI::Text(this.style + this.icon);
     }
 
     void DrawTime() {
-        UI::Text(this.style + (this.time > 0 ? Time::Format(this.time) : "-:--.---"));
+        UI::Text(this.FormattedTime());
+    }
+    
+    string FormattedTime() {
+        return this.style + (this.time > 0 ? Time::Format(this.time) : "-:--.---");
     }
     
     void DrawDelta(Record@ other) {
         int delta = other.time - this.time;
+        string color = "f77";
+        string sign = "+";
         if (delta < 0) {
-            UI::Text("\\$7f7" + "New PB");
-        } else if (delta >= 0) {
-            string color = "f77";
-            if (delta < 100) {
-                color = "fc0";
-            } else if (delta < 500) {
-                color = "fa3";
-            }
-            UI::Text("\\$" + color + "+" + Time::Format(delta));
+            color = "070";
+            sign = "-";
+            delta *= -1;
+        } else if (delta < 100) {
+            color = "fc0";
+        } else if (delta < 500) {
+            color = "fa3";
         }
+        UI::Text("\\$" + color + sign + Time::Format(delta));
     }
 }
 
@@ -157,6 +205,7 @@ void Render() {
         uint numCols = 3; 
         if(UI::BeginTable(pluginName, numCols, UI::TableFlags::SizingFixedFit)) {
             
+            // print(targets.Length);
             for(uint i = 0; i < targets.Length; i++) {
                 if(targets[i].hidden) {
                     continue;
@@ -164,7 +213,7 @@ void Render() {
                 UI::TableNextRow();
                 
                 UI::TableNextColumn();
-                targets[i].DrawTitle();
+                targets[i].DrawIcon();
                 
                 UI::TableNextColumn();
                 targets[i].DrawTime();
@@ -188,8 +237,8 @@ void Render() {
                 UI::TableNextRow();
                 
                 UI::TableNextColumn();
-                if (records[i].title.Length > 0) {
-                    records[i].DrawTitle();
+                if (records[i].icon.Length > 0) {
+                    records[i].DrawIcon();
                 } else {
                     UI::Text("" + (i + 1));
                 }
@@ -201,15 +250,21 @@ void Render() {
                 currentTarget.DrawDelta(records[i]);
             };
             UI::EndTable();
-            
-            if (UI::IsOverlayShown()) {
-                UI::Columns(1);
-                if (UI::Button("Clear history")) {
-                    OnClearHistory();
-                }
-            }
         }
         UI::EndGroup();
+            
+        if (UI::IsOverlayShown()) {
+            UI::Columns(1);
+            if (UI::Button("Clear history")) {
+                OnClearHistory();
+            }
+
+            if (UI::Button("Change target")) {
+                UI::OpenPopup(POPUP_CHANGE_TARGET);
+            }
+        }
+
+        RenderChangeTargetPopup();
         
         UI::End();
     }
@@ -265,6 +320,9 @@ void UpdateChampionTime() {
 
 void UpdateTargets()
 {
+    if (!autoChangeTarget) {
+        return;
+    }
     @currentTarget = targets[1];
     for(uint i = 2; i < targets.Length; i++) {
         if (currentTarget.time < 1 || (targets[i].time > 0 && (targets[i].time < pb.time || pb.time < 1) && targets[i].time > currentTarget.time)) {
@@ -274,6 +332,12 @@ void UpdateTargets()
     if (pb.time > 0 && currentTarget.time > pb.time) {
         @currentTarget = @pb;
     }
+    SetTarget(currentTarget);
+}
+
+void SetTarget(Record @target) {
+    @currentTarget = target;
+    print(target.icon);
     for (uint i = 0; i < targets.Length; i++) {
         targets[i].hidden = true;
     }
