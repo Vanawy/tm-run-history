@@ -3,9 +3,10 @@ uint recordsLimit = 10;
 
 [Setting category="Display" name="Window position"]
 vec2 anchor = vec2(0, 170);
-
 [Setting category="Display" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
 bool lockPosition = false;
+[Setting category="Display" name="Small action buttons"]
+bool smallButtons = true;
 
 bool autoChangeTarget = true;
 
