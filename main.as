@@ -7,19 +7,21 @@ vec2 anchor = vec2(0, 170);
 [Setting category="Display" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
 bool lockPosition = false;
 
-
 bool autoChangeTarget = true;
 
-// [Settings category="Target time" name=""]
+const string TEXT_PLUGIN_NAME = "RunHistory";
+const string TEXT_DEFAULT_TARGET = "Default (closest target)";
+const string TEXT_CLEAR = "Clear history";
+const string TEXT_CHANGE = "Change target";
 
-string pluginName = "RunHistory";
+const string ICON_CLEAR = Icons::Times;
+const string ICON_CHANGE = Icons::ClockO;
 
-const string TEXT_DEFAULT_TARGET = "Default (closest target)"; 
 
 [SettingsTab name="Feedback" icon="Bug"]
-void RenderSettings()
+void RenderFeedbackTab()
 {
-    UI::Text("Thank you for using " + pluginName + "!");
+    UI::Text("Thank you for using " + TEXT_PLUGIN_NAME + "!");
     UI::Text("To report issues or send feedback use buttons below " + "\\$f69" + Icons::Heart);
 
     if (UI::Button("GitHub " + Icons::Github)) {
@@ -30,6 +32,7 @@ void RenderSettings()
     }
 }
 
+
 void RenderChangeTargetPopup()
 {
     if (!UI::IsOverlayShown()) return;
@@ -38,7 +41,7 @@ void RenderChangeTargetPopup()
         if (!autoChangeTarget && currentTarget != null) {
             text = currentTarget.style + currentTarget.icon + currentTarget.FormattedTime();
         }
-        if (UI::BeginCombo("Target", text)) {
+        if (UI::BeginCombo(Icons::ClockO, text)) {
             if (UI::Selectable(TEXT_DEFAULT_TARGET, autoChangeTarget)) {
                 autoChangeTarget = true;
                 UpdateTargets();
@@ -62,6 +65,35 @@ void RenderChangeTargetPopup()
         // autoChangeTarget = UI::Checkbox("Auto change target", autoChangeTarget);
         UI::EndPopup();
     }
+}
+
+
+void RenderActions()
+{
+    if (UI::IsOverlayShown()) {
+        // UI::Columns(1);
+        if (UI::Button(smallButtons ? ICON_CLEAR : TEXT_CLEAR)) {
+            OnClearHistory();
+        }
+        if (smallButtons && UI::IsItemHovered(UI::HoveredFlags::None)) {
+            UI::BeginTooltip();
+            UI::Text(TEXT_CLEAR);
+            UI::EndTooltip();
+        }
+        if (smallButtons) {
+            UI::SameLine();
+        }
+        if (UI::Button(smallButtons ? ICON_CHANGE : TEXT_CHANGE)) {
+            UI::OpenPopup(POPUP_CHANGE_TARGET);
+        }
+        if (smallButtons && UI::IsItemHovered(UI::HoveredFlags::None)) {
+            UI::BeginTooltip();
+            UI::Text(TEXT_CHANGE);
+            UI::EndTooltip();
+        }
+    }
+
+    RenderChangeTargetPopup();
 }
 
 array<Record> records;
@@ -203,7 +235,7 @@ void Render() {
         UI::BeginGroup();
 
         uint numCols = 3; 
-        if(UI::BeginTable(pluginName, numCols, UI::TableFlags::SizingFixedFit)) {
+        if(UI::BeginTable(TEXT_PLUGIN_NAME, numCols, UI::TableFlags::SizingFixedFit)) {
             
             // print(targets.Length);
             for(uint i = 0; i < targets.Length; i++) {
@@ -252,19 +284,8 @@ void Render() {
             UI::EndTable();
         }
         UI::EndGroup();
-            
-        if (UI::IsOverlayShown()) {
-            UI::Columns(1);
-            if (UI::Button("Clear history")) {
-                OnClearHistory();
-            }
 
-            if (UI::Button("Change target")) {
-                UI::OpenPopup(POPUP_CHANGE_TARGET);
-            }
-        }
-
-        RenderChangeTargetPopup();
+        RenderActions();
         
         UI::End();
     }
