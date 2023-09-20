@@ -1,3 +1,14 @@
+const string TEXT_PLUGIN_NAME = "RunHistory";
+const string TEXT_DEFAULT_TARGET = "Default (closest target)";
+const string TEXT_CLEAR = "Clear history";
+const string TEXT_CHANGE = "Change target";
+
+const string ICON_CLEAR = Icons::Times;
+const string ICON_CHANGE = Icons::ClockO;
+
+const string DEFAULT_DELTAS = '500|100';
+
+
 [Setting category="General" name="Records Limit" description="Limit amount of records displayed in history"]
 uint recordsLimit = 10;
 
@@ -8,18 +19,12 @@ bool lockPosition = false;
 [Setting category="Display" name="Small action buttons"]
 bool smallButtons = true;
 
-[Setting category="Thresholds" name="Test"]
-string deltasString = "500|100";
+
+[Setting hidden]
+string deltasString = DEFAULT_DELTAS;
+
 
 bool autoChangeTarget = true;
-
-const string TEXT_PLUGIN_NAME = "RunHistory";
-const string TEXT_DEFAULT_TARGET = "Default (closest target)";
-const string TEXT_CLEAR = "Clear history";
-const string TEXT_CHANGE = "Change target";
-
-const string ICON_CLEAR = Icons::Times;
-const string ICON_CHANGE = Icons::ClockO;
 
 
 [SettingsTab name="Feedback" icon="Bug"]
@@ -41,6 +46,10 @@ Thresholds::Table thresholdsTable = Thresholds::Table();
 [SettingsTab name="Thresholds" icon="ClockO"]
 void RenderThresholdsTab()
 {
+    if (UI::Button("Reset to default")) {
+        deltasString = DEFAULT_DELTAS;
+        thresholdsTable.FromString(deltasString);
+    }
     UI::Text("Configure delta time thresholds");
     UI::NewLine();
     thresholdsTable.Render();
@@ -151,7 +160,7 @@ void AddTime(int time)
 
 void UpdateRecordDelta(Record@ record) 
 {
-    if (currentTarget == null) {
+    if (@currentTarget == null) {
         return;
     }
     record.UpdateDelta(currentTarget);
@@ -349,7 +358,7 @@ void UpdateTargets()
 
 void UpdateRecords()
 {
-    for (int i = 0; i < records.Length; i++) {
+    for (int i = 0; i < int(records.Length); i++) {
         UpdateRecordDelta(records[i]);
     }
 }

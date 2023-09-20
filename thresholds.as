@@ -27,7 +27,7 @@ namespace Thresholds {
 
         void FromString(string _settingsString) {
             auto times = _settingsString.Split(STRING_DELIMITER, LIMIT);
-            for (int i = 0; i < times.Length; i++) {
+            for (int i = 0; i < int(times.Length); i++) {
                 this.Add(Text::ParseInt(times[i]));
             }
         }
@@ -40,27 +40,30 @@ namespace Thresholds {
             return string::Join(deltasStrings, STRING_DELIMITER);
         }
         
-        void Add(int timeMs) {
+        private void Add(int timeMs) {
             if (this.deltas.Find(timeMs) >= 0) {
                 return;
             }
-            print("added " + timeMs);
             this.deltas.InsertLast(timeMs);
             this.deltas.SortDesc();
         } 
+        
+        private void RemoveAt(int index) {
+            this.deltas.RemoveAt(index);
+            this.deltas.SortDesc();
+        } 
 
-        string GetColor(int timeIndex) {
+        private string GetColor(int timeIndex) {
             int colorIndex = Math::Round(float(timeIndex) / this.deltas.Length * (COLORS.Length - 1));
             return COLORS[colorIndex];
         }
 
         void Render() {
-            UI::Text("Delta time thresholds");
+            UI::Text("Delta time thresholds (" + this.deltas.Length + "/" + LIMIT + ")");
 
             if(UI::BeginTable("Delta Thresholds", 4, UI::TableFlags::SizingStretchProp)) {
 
-                int count = this.deltas.Length;
-                for (int i = 0; i < count; i++) {
+                for (int i = 0; i < this.deltas.Length; i++) {
                     UI::TableNextRow();
                     UI::TableNextColumn();
                     UI::Text("#" + (i + 1));
@@ -72,7 +75,12 @@ namespace Thresholds {
                     UI::Text(this.deltas[i] + " ms");
 
                     UI::TableNextColumn();
-                    UI::Button(Icons::Times);
+                    if (UI::Button(Icons::Times + i)) {
+                        print("remove " + i);
+                        this.RemoveAt(i);
+                        this.isChanged = true;
+                        continue;
+                    }
                 }
 
                 UI::TableNextRow();
@@ -110,14 +118,13 @@ namespace Thresholds {
             }
         }
 
-        string GetColorByDelta(int deltaTime, string defaultColor) {
+        string GetColorByDelta(int deltaTime, string _defaultColor) {
             for (int i = this.deltas.Length - 1; i >= 0; i--) {
-                print(i);
                 if (deltaTime < this.deltas[i]) {
                     return this.GetColor(i);
                 }
             }
-            return defaultColor;
+            return _defaultColor;
         }
     }
 
