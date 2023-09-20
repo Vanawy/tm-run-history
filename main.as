@@ -8,6 +8,9 @@ bool lockPosition = false;
 [Setting category="Display" name="Small action buttons"]
 bool smallButtons = true;
 
+[Setting category="Thresholds" name="Test"]
+string deltasString = "500|100";
+
 bool autoChangeTarget = true;
 
 const string TEXT_PLUGIN_NAME = "RunHistory";
@@ -33,13 +36,28 @@ void RenderFeedbackTab()
     }
 }
 
+Thresholds::Table thresholdsTable = Thresholds::Table();
+
+[SettingsTab name="Thresholds" icon="ClockO"]
+void RenderThresholdsTab()
+{
+    UI::Text("Configure delta time thresholds");
+    UI::NewLine();
+    thresholdsTable.Render();
+    if (thresholdsTable.isChanged) {
+        deltasString = thresholdsTable.ToString();
+        thresholdsTable.isChanged = false;
+        UpdateRecords();
+    }
+}
+
 
 void RenderChangeTargetPopup()
 {
     if (!UI::IsOverlayShown()) return;
     if (UI::BeginPopup(POPUP_CHANGE_TARGET)) {
         string text = TEXT_DEFAULT_TARGET;
-        if (!autoChangeTarget && currentTarget != null) {
+        if (!autoChangeTarget && @currentTarget != null) {
             text = currentTarget.style + currentTarget.icon + currentTarget.FormattedTime();
         }
         if (UI::BeginCombo(Icons::ClockO, text)) {
@@ -116,14 +134,12 @@ const string PB_TEXT = "\\$0ff" + Icons::User;
 
 const string POPUP_CHANGE_TARGET = "ChangeTarget";
 
-void AddTime(int time, string &in title = "") {
+void AddTime(int time) 
+{
     int count = records.Length;
     records.Resize(count + 1);
     records[count].time = time;
-    if (time < pb.time) {
-        title = "PB";
-    }
-    records[count].icon = title;
+    UpdateRecordDelta(records[count]);
     count = records.Length;
     for (int i = 0; i < count; i++) {
         records[i].hidden = false;
@@ -133,55 +149,25 @@ void AddTime(int time, string &in title = "") {
     }
 }
 
-void ClearRecords()
+void UpdateRecordDelta(Record@ record) 
+{
+    if (currentTarget == null) {
+        return;
+    }
+    record.UpdateDelta(currentTarget);
+    string color = "f77";
+    if (record.delta > 0) {
+        color = "070";
+    } else {
+        color = thresholdsTable.GetColorByDelta(-record.delta, color);
+    }
+    record.style = "\\$" + color;
+}
+
+void ClearRecords() 
 {
     records.Resize(0);
 }
-
-class Record {
-    string icon;
-    int time;
-    string style;
-    bool hidden;
-
-    Record(){}
-    
-    Record(string &in icon, int time = -1, string &in style = "\\$fff") {
-        this.icon = icon;
-        this.time = time;
-        this.style = style;
-        this.hidden = false;
-    }
-
-    void DrawIcon() {
-        UI::Text(this.style + this.icon);
-    }
-
-    void DrawTime() {
-        UI::Text(this.FormattedTime());
-    }
-    
-    string FormattedTime() {
-        return this.style + (this.time > 0 ? Time::Format(this.time) : "-:--.---");
-    }
-    
-    void DrawDelta(Record@ other) {
-        int delta = other.time - this.time;
-        string color = "f77";
-        string sign = "+";
-        if (delta < 0) {
-            color = "070";
-            sign = "-";
-            delta *= -1;
-        } else if (delta < 100) {
-            color = "fc0";
-        } else if (delta < 500) {
-            color = "fa3";
-        }
-        UI::Text("\\$" + color + sign + Time::Format(delta));
-    }
-}
-
 
 Record@ bronze  = Record(colors[0] + MEDAL_ICON);
 Record@ silver  = Record(colors[1] + MEDAL_ICON);
@@ -280,7 +266,7 @@ void Render() {
                 records[i].DrawTime();
 
                 UI::TableNextColumn();
-                currentTarget.DrawDelta(records[i]);
+                records[i].DrawDelta();
             };
             UI::EndTable();
         }
@@ -301,6 +287,9 @@ void Main() {
 #else
     warn("ChampionMedals not installed");
 #endif
+
+    // init delta thresholds table
+    thresholdsTable.FromString(deltasString);
 
     while(true) {
         sleep(1000);
@@ -332,7 +321,7 @@ void Main() {
 #if DEPENDENCY_CHAMPIONMEDALS
 void UpdateChampionTime() {
     auto newTime = ChampionMedals::GetCMTime();
-    if (champion.time != newTime) {
+    if (champion.time != int(newTime)) {
         champion.time = newTime;
         print("Champion Medal detected: " + Time::Format(champion.time));
         UpdateTargets();
@@ -342,6 +331,7 @@ void UpdateChampionTime() {
 
 void UpdateTargets()
 {
+    UpdateRecords();
     if (!autoChangeTarget) {
         return;
     }
@@ -357,6 +347,13 @@ void UpdateTargets()
     SetTarget(currentTarget);
 }
 
+void UpdateRecords()
+{
+    for (int i = 0; i < records.Length; i++) {
+        UpdateRecordDelta(records[i]);
+    }
+}
+
 void SetTarget(Record @target) {
     @currentTarget = target;
     print(target.icon);
@@ -364,6 +361,7 @@ void SetTarget(Record @target) {
         targets[i].hidden = true;
     }
     currentTarget.hidden = false;
+    UpdateRecords();
 }
 
 string BoolToStr(bool value) {
