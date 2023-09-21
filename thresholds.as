@@ -75,7 +75,7 @@ namespace Thresholds {
                     UI::Text(this.deltas[i] + " ms");
 
                     UI::TableNextColumn();
-                    if (UI::Button(Icons::Times + i)) {
+                    if (UI::Button(Icons::Times + (i + 1))) {
                         print("remove " + i);
                         this.RemoveAt(i);
                         this.isChanged = true;
