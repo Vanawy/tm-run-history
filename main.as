@@ -32,7 +32,7 @@ array<string> colors = {
 
 
 const string PB_TEXT = "\\$0ff" + Icons::User;
-const string CUSTOM_TEXT = "\\$f22" + Icons::Crosshairs;
+const string CUSTOM_TEXT = "\\$c11" + Icons::Crosshairs;
 
 Record@ bronze  = Record(colors[0] + MEDAL_ICON);
 Record@ silver  = Record(colors[1] + MEDAL_ICON);
