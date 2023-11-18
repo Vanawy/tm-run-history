@@ -4,6 +4,10 @@ namespace Thresholds {
 
     const string STRING_DELIMITER = "|";
 
+    const string COLOR_NEGATIVE = "f77";
+
+    const string COLOR_POSITIVE = "070";
+
     const array<string> COLORS = {
         "F60",
         "F70",
@@ -63,6 +67,12 @@ namespace Thresholds {
 
             if(UI::BeginTable("Delta Thresholds", 4, UI::TableFlags::SizingStretchProp)) {
 
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("#0");
+                UI::TableNextColumn();
+                UI::Text("\\$" + COLOR_NEGATIVE + "+" + Time::Format(69420));
+
                 for (int i = 0; i < this.deltas.Length; i++) {
                     UI::TableNextRow();
                     UI::TableNextColumn();
@@ -75,7 +85,7 @@ namespace Thresholds {
                     UI::Text(this.deltas[i] + " ms");
 
                     UI::TableNextColumn();
-                    if (UI::Button(Icons::Times + (i + 1))) {
+                    if (UI::Button(Icons::Times + "##" + (i + 1))) {
                         print("remove " + i);
                         this.RemoveAt(i);
                         this.isChanged = true;
@@ -118,13 +128,18 @@ namespace Thresholds {
             }
         }
 
-        string GetColorByDelta(int deltaTime, string _defaultColor) {
-            for (int i = this.deltas.Length - 1; i >= 0; i--) {
-                if (deltaTime < this.deltas[i]) {
-                    return this.GetColor(i);
+        string GetColorByDelta(int deltaTime) {
+            string color = COLOR_NEGATIVE;
+            if (deltaTime > 0) {
+                color = COLOR_POSITIVE;
+            } else {
+                for (int i = this.deltas.Length - 1; i >= 0; i--) {
+                    if (-deltaTime < this.deltas[i]) {
+                        return this.GetColor(i);
+                    }
                 }
             }
-            return _defaultColor;
+            return color;
         }
     }
 

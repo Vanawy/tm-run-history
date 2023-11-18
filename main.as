@@ -1,14 +1,3 @@
-const string TEXT_PLUGIN_NAME = "RunHistory";
-const string TEXT_DEFAULT_TARGET = "Default (closest target)";
-const string TEXT_CLEAR = "Clear history";
-const string TEXT_CHANGE = "Change target";
-
-const string ICON_CLEAR = Icons::Times;
-const string ICON_CHANGE = Icons::ClockO;
-
-const string DEFAULT_DELTAS = '500|100';
-
-
 [Setting category="General" name="Records Limit" description="Limit amount of records displayed in history"]
 uint recordsLimit = 10;
 
@@ -23,8 +12,52 @@ bool smallButtons = true;
 [Setting hidden]
 string deltasString = DEFAULT_DELTAS;
 
-
 bool autoChangeTarget = true;
+
+array<Record> records;
+
+
+const string MEDAL_ICON = Icons::Circle;
+
+array<string> colors = {
+    "\\$964", // bronze medal
+    "\\$899", // silver medal
+    "\\$db4", // gold medal
+    "\\$071", // author medal
+#if DEPENDENCY_CHAMPIONMEDALS
+    "\\$f69", // champion medal
+#endif
+};
+
+
+const string PB_TEXT = "\\$0ff" + Icons::User;
+const string CUSTOM_TEXT = "\\$f22" + Icons::Crosshairs;
+
+Record@ bronze  = Record(colors[0] + MEDAL_ICON);
+Record@ silver  = Record(colors[1] + MEDAL_ICON);
+Record@ gold    = Record(colors[2] + MEDAL_ICON);
+Record@ author  = Record(colors[3] + MEDAL_ICON);
+#if DEPENDENCY_CHAMPIONMEDALS
+Record@ champion  = Record(colors[4] + MEDAL_ICON);
+#endif
+
+Record@ pb = Record(PB_TEXT, 0);
+Record@ custom = Record(CUSTOM_TEXT, 0);
+
+array<Record@> targets = {
+    custom,
+    pb,
+#if DEPENDENCY_CHAMPIONMEDALS
+    champion,
+#endif
+    author,
+    gold,
+    silver,
+    bronze
+};
+
+Record@ currentTarget = null;
+
 
 
 [SettingsTab name="Feedback" icon="Bug"]
@@ -95,53 +128,69 @@ void RenderChangeTargetPopup()
     }
 }
 
+float newTime = 0;
+void RenderAddTargetPopup()
+{
+    if (!UI::IsOverlayShown()) return;
+    if (UI::BeginPopup(POPUP_ADD_TARGET)) {
+        if (custom.time > 0) {
+            UI::Text("Custom time - " + Time::Format(custom.time));
+            UI::Text("Change custom time");
+        } else {
+            UI::Text("Add custom time");
+        }
+        newTime = UI::InputFloat("seconds", newTime, 0.005);
+        UI::Text("New time " + Time::Format(newTime * 1000.0));
+        if (UI::Button(TEXT_ADD)) {
+            custom.time = newTime * 1000.0;
+            newTime = 0;
+            custom.time = custom.time;
+            SetTarget(custom); 
+        }
+        UI::EndPopup();
+    }
+}
+
 
 void RenderActions()
 {
-    if (UI::IsOverlayShown()) {
-        // UI::Columns(1);
-        if (UI::Button(smallButtons ? ICON_CLEAR : TEXT_CLEAR)) {
-            OnClearHistory();
-        }
-        if (smallButtons && UI::IsItemHovered(UI::HoveredFlags::None)) {
-            UI::BeginTooltip();
-            UI::Text(TEXT_CLEAR);
-            UI::EndTooltip();
-        }
-        if (smallButtons) {
-            UI::SameLine();
-        }
-        if (UI::Button(smallButtons ? ICON_CHANGE : TEXT_CHANGE)) {
-            UI::OpenPopup(POPUP_CHANGE_TARGET);
-        }
-        if (smallButtons && UI::IsItemHovered(UI::HoveredFlags::None)) {
-            UI::BeginTooltip();
-            UI::Text(TEXT_CHANGE);
-            UI::EndTooltip();
-        }
+    if (!UI::IsOverlayShown()) return;
+
+    // UI::Columns(1);
+    if (UI::Button(smallButtons ? ICON_CLEAR : TEXT_CLEAR)) {
+        OnClearHistory();
+    }
+    if (smallButtons && UI::IsItemHovered(UI::HoveredFlags::None)) {
+        UI::BeginTooltip();
+        UI::Text(TEXT_CLEAR);
+        UI::EndTooltip();
+    }
+    if (smallButtons) {
+        UI::SameLine();
+    }
+    if (UI::Button(smallButtons ? ICON_CHANGE : TEXT_CHANGE)) {
+        UI::OpenPopup(POPUP_CHANGE_TARGET);
+    }
+    if (smallButtons && UI::IsItemHovered(UI::HoveredFlags::None)) {
+        UI::BeginTooltip();
+        UI::Text(TEXT_CHANGE);
+        UI::EndTooltip();
+    }
+    if (smallButtons) {
+        UI::SameLine();
+    }
+    if (UI::Button(smallButtons ? ICON_ADD : TEXT_ADD)) {
+        UI::OpenPopup(POPUP_ADD_TARGET);
+    }
+    if (smallButtons && UI::IsItemHovered(UI::HoveredFlags::None)) {
+        UI::BeginTooltip();
+        UI::Text(TEXT_ADD);
+        UI::EndTooltip();
     }
 
     RenderChangeTargetPopup();
+    RenderAddTargetPopup();
 }
-
-array<Record> records;
-
-
-array<string> colors = {
-    "\\$964", // bronze medal
-    "\\$899", // silver medal
-    "\\$db4", // gold medal
-    "\\$071", // author medal
-#if DEPENDENCY_CHAMPIONMEDALS
-    "\\$f69", // champion medal
-#endif
-};
-
-const string MEDAL_ICON = Icons::Circle;
-
-const string PB_TEXT = "\\$0ff" + Icons::User;
-
-const string POPUP_CHANGE_TARGET = "ChangeTarget";
 
 void AddTime(int time) 
 {
@@ -164,42 +213,13 @@ void UpdateRecordDelta(Record@ record)
         return;
     }
     record.UpdateDelta(currentTarget);
-    string color = "f77";
-    if (record.delta > 0) {
-        color = "070";
-    } else {
-        color = thresholdsTable.GetColorByDelta(-record.delta, color);
-    }
-    record.style = "\\$" + color;
+    record.style = "\\$" + thresholdsTable.GetColorByDelta(record.delta);
 }
 
 void ClearRecords() 
 {
     records.Resize(0);
 }
-
-Record@ bronze  = Record(colors[0] + MEDAL_ICON);
-Record@ silver  = Record(colors[1] + MEDAL_ICON);
-Record@ gold    = Record(colors[2] + MEDAL_ICON);
-Record@ author  = Record(colors[3] + MEDAL_ICON);
-#if DEPENDENCY_CHAMPIONMEDALS
-Record@ champion  = Record(colors[4] + MEDAL_ICON);
-#endif
-
-Record@ pb = Record(PB_TEXT, 0);
-
-array<Record@> targets = {
-    pb,
-#if DEPENDENCY_CHAMPIONMEDALS
-    champion,
-#endif
-    author,
-    gold,
-    silver,
-    bronze
-};
-
-Record@ currentTarget = null;
 
 void Render() {
     auto app = cast<CTrackMania@>(GetApp());
@@ -420,7 +440,8 @@ void OnMapChange(CGameCtnChallenge@ map) {
             print("PB detected: " + Time::Format(pb.time));
         }
     }
-
+    custom.time = 0;
+    
     UpdateTargets();
 }
 
