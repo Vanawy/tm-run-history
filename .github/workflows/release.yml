@@ -24,16 +24,12 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
       - uses: TheDoctor0/zip-release@0.7.6
         with:
           # Filename for archive
           filename: 'release.op'
           # List of excluded files / directories
-          exclusions: '/data .gitignore /.git /.github/*'
+          exclusions: '/data/* .gitignore /.git/* /.github/*'
       - name: Upload Release
         uses: ncipollo/release-action@v1.12.0
         with:
