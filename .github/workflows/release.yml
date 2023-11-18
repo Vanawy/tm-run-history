@@ -28,7 +28,8 @@ jobs:
           # Filename for archive
           filename: 'release.op'
           # List of excluded files / directories
-          exclusions: '/data/* .gitignore /.git/* /.github/*'
+          exclusions: 'data/* .gitignore .git/* .github/*'
+          recursive_exclusions: '*.psd *.png'
       - name: Upload Release
         uses: ncipollo/release-action@v1.12.0
         with:
