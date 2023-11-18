@@ -7,7 +7,8 @@ vec2 anchor = vec2(0, 170);
 bool lockPosition = false;
 [Setting category="Display" name="Small action buttons"]
 bool smallButtons = true;
-
+[Setting category="Display" name="Hide with overlay"]
+bool hideWithOverlay = false;
 
 [Setting hidden]
 string deltasString = DEFAULT_DELTAS;
@@ -227,6 +228,10 @@ void Render() {
     auto map = app.RootMap;
     
     if(!UI::IsGameUIVisible()) {
+        return;
+    }
+
+    if (hideWithOverlay && !UI::IsOverlayShown()) {
         return;
     }
     
