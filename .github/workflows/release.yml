@@ -23,13 +23,19 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          mkdir tmp
+          cp *.as tmp/
+          cp info.toml tmp/
+          cp LICENSE tmp/
+
       - uses: TheDoctor0/zip-release@0.7.6
         with:
+          path: tmp
           # Filename for archive
           filename: 'release.op'
-          # List of excluded files / directories
-          exclusions: 'data data/* .gitignore /.git/* /.github/* *.git*'
-          recursive_exclusions: '*.psd *.png'
       - name: Upload Release
         uses: ncipollo/release-action@v1.12.0
         with:
