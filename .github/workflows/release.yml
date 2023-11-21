@@ -35,7 +35,7 @@ jobs:
         with:
           directory: tmp
           # Filename for archive
-          filename: 'release.op'
+          filename: 'tmp/release.op'
       - name: Upload Release
         uses: ncipollo/release-action@v1.12.0
         with:
