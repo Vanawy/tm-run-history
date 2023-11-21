@@ -46,8 +46,8 @@ Record@ pb = Record(PB_TEXT, 0);
 Record@ custom = Record(CUSTOM_TEXT, 0);
 
 array<Record@> targets = {
+    pb, // Should be first for correct target autoselection
     custom,
-    pb,
 #if DEPENDENCY_CHAMPIONMEDALS
     champion,
 #endif
@@ -106,7 +106,7 @@ void RenderChangeTargetPopup()
         if (UI::BeginCombo(Icons::ClockO, text)) {
             if (UI::Selectable(TEXT_DEFAULT_TARGET, autoChangeTarget)) {
                 autoChangeTarget = true;
-                UpdateTargets();
+                UpdateCurrentTarget();
                 UI::CloseCurrentPopup();
             }
             for(uint i = 0; i < targets.Length; i++) {
@@ -358,15 +358,15 @@ void UpdateChampionTime() {
     if (champion.time != int(newTime)) {
         champion.time = newTime;
         print("Champion Medal detected: " + Time::Format(champion.time));
-        UpdateTargets();
+        UpdateCurrentTarget();
     }
 }
 #endif
 
-void UpdateTargets()
+void UpdateCurrentTarget()
 {
-    UpdateRecords();
     if (!autoChangeTarget) {
+        UpdateRecords();
         return;
     }
     @currentTarget = targets[1];
@@ -411,7 +411,7 @@ void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost) {
     if (pb.time < 1 || lastTime < pb.time) {
         pb.time = lastTime;
     }
-    UpdateTargets();
+    UpdateCurrentTarget();
 }
 
 void OnMapChange(CGameCtnChallenge@ map) {
@@ -447,7 +447,7 @@ void OnMapChange(CGameCtnChallenge@ map) {
     }
     custom.time = 0;
     
-    UpdateTargets();
+    UpdateCurrentTarget();
 }
 
 void OnClearHistory() {
