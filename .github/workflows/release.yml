@@ -33,7 +33,7 @@ jobs:
 
       - uses: TheDoctor0/zip-release@0.7.6
         with:
-          path: tmp
+          directory: tmp
           # Filename for archive
           filename: 'release.op'
       - name: Upload Release
