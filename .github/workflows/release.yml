@@ -35,9 +35,9 @@ jobs:
         with:
           directory: tmp
           # Filename for archive
-          filename: 'release.op'
+          filename: 'RunHistory${{ steps.vars.outputs.tag }}.op'
       - name: Upload Release
         uses: ncipollo/release-action@v1.12.0
         with:
-          artifacts: "tmp/release.op"
+          artifacts: "tmp/*.op"
           token: ${{ secrets.GITHUB_TOKEN }}
