@@ -32,13 +32,13 @@ jobs:
           cp LICENSE tmp/
 
       - name: Set tag env
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+        run: echo "RELEASE_NAME=RunHistory${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
       - uses: TheDoctor0/zip-release@0.7.6
         with:
           directory: tmp
           # Filename for archive
-          filename: "RunHistory${RELEASE_VERSION}.op"
+          filename: ${{ env.RELEASE_NAME }}
       - name: Upload Release
         uses: ncipollo/release-action@v1.12.0
         with:
