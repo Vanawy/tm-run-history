@@ -31,11 +31,14 @@ jobs:
           cp info.toml tmp/
           cp LICENSE tmp/
 
+      - name: Set tag env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
       - uses: TheDoctor0/zip-release@0.7.6
         with:
           directory: tmp
           # Filename for archive
-          filename: 'RunHistory${{ steps.vars.outputs.tag }}.op'
+          filename: "RunHistory${RELEASE_VERSION}.op"
       - name: Upload Release
         uses: ncipollo/release-action@v1.12.0
         with:
