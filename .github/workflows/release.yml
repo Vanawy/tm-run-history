@@ -32,7 +32,7 @@ jobs:
           cp LICENSE tmp/
 
       - name: Set tag env
-        run: echo "RELEASE_NAME=RunHistory${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+        run: echo "RELEASE_NAME=RunHistory${GITHUB_REF#refs/*/}.op" >> $GITHUB_ENV
 
       - uses: TheDoctor0/zip-release@0.7.6
         with:
