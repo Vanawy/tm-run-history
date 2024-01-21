@@ -5,6 +5,8 @@ class Record {
     bool hidden;
     int delta;
 
+    string deltaTextOverride;
+
     Record(){}
     
     Record(string &in icon, int time = -1, string &in style = "\\$fff") {
@@ -31,6 +33,10 @@ class Record {
     }
     
     void DrawDelta() {
+        if (deltaTextOverride.Length > 0) {
+            UI::Text(deltaTextOverride);
+            return;
+        }
         string sign = "-";
         int delta = this.delta;
         if (delta < 0) {

@@ -218,6 +218,15 @@ void AddTime(int time)
     int count = records.Length;
     records.Resize(count + 1);
     records[count].time = time;
+
+    if (isPBOnly && (pb.time < 1 || time < pb.time)) {
+        int delta = pb.time - time;
+        string color = "\\$0ff";
+        records[count].deltaTextOverride = color + "PB";
+        if (pb.time > 0 && delta > 0) {
+            records[count].deltaTextOverride = color + "-" + Time::Format(delta, true, false);
+        }
+    }
     UpdateRecordDelta(records[count]);
     count = records.Length;
     for (int i = 0; i < count; i++) {
