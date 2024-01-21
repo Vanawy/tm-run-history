@@ -2,6 +2,9 @@
 uint recordsLimit = 10;
 [Setting category="General" name="PBs only" description="Save only PB records"]
 bool isPBOnly = false;
+[Setting category="General" name="Default target medal" description="Target medal chosen on map load"]
+DefaultTargetMedalOptions defaultTarget = DefaultTargetMedalOptions::closestNotBeaten;
+
 
 [Setting category="Display" name="Window position"]
 vec2 anchor = vec2(0, 170);
@@ -19,6 +22,17 @@ bool autoChangeTarget = true;
 
 array<Record> records;
 
+enum DefaultTargetMedalOptions {
+    closestNotBeaten,
+    pb,
+#if DEPENDENCY_CHAMPIONMEDALS
+    champion,
+#endif
+    author,
+    gold,
+    silver,
+    bronze,
+}
 
 const string MEDAL_ICON = Icons::Circle;
 
@@ -375,10 +389,36 @@ void UpdateCurrentTarget()
         UpdateRecords();
         return;
     }
-    @currentTarget = targets[1];
-    for(uint i = 2; i < targets.Length; i++) {
-        if (currentTarget.time < 1 || (targets[i].time > 0 && (targets[i].time < pb.time || pb.time < 1) && targets[i].time > currentTarget.time)) {
-            @currentTarget = @targets[i];
+    if (defaultTarget == DefaultTargetMedalOptions::pb) {
+        @currentTarget = @pb;
+    } else {
+        uint maxTargetId = 1;
+
+        switch (defaultTarget) {
+#if DEPENDENCY_CHAMPIONMEDALS
+            case DefaultTargetMedalOptions::champion:
+                maxTargetId = 2;
+                break;
+#endif
+            case DefaultTargetMedalOptions::author:
+                maxTargetId = 3;
+                break;
+            case DefaultTargetMedalOptions::gold:
+                maxTargetId = 4;
+                break;
+            case DefaultTargetMedalOptions::silver:
+                maxTargetId = 5;
+                break;
+            default:
+                maxTargetId = 6;
+                break;
+        }
+
+        @currentTarget = targets[1];
+        for(uint i = 2; i <= maxTargetId; i++) {
+            if (currentTarget.time < 1 || (targets[i].time > 0 && (targets[i].time < pb.time || pb.time < 1) && targets[i].time > currentTarget.time)) {
+                @currentTarget = @targets[i];
+            }
         }
     }
     if (pb.time > 0 && currentTarget.time > pb.time) {
