@@ -1,5 +1,7 @@
 [Setting category="General" name="Records Limit" description="Limit amount of records displayed in history"]
 uint recordsLimit = 10;
+[Setting category="General" name="PBs only" description="Save only PB records"]
+bool isPBOnly = false;
 
 [Setting category="Display" name="Window position"]
 vec2 anchor = vec2(0, 170);
@@ -195,6 +197,10 @@ void RenderActions()
 
 void AddTime(int time) 
 {
+    if (isPBOnly && pb.time > 0 && time > pb.time) {
+        // Ignore non PB time if setting enabled
+        return;
+    }
     int count = records.Length;
     records.Resize(count + 1);
     records[count].time = time;
