@@ -397,12 +397,18 @@ void UpdateCurrentTarget()
     if (!autoChangeTarget) {
         UpdateRecords();
         return;
-    }
+    } 
     if (defaultTarget == DefaultTargetMedalOptions::pb) {
         @currentTarget = @pb;
     } else {
         uint maxTargetId = 1;
 
+        // TODO: Refactor this in next update 
+        // HOTFIX
+        uint offset = 0;
+#if DEPENDENCY_CHAMPIONMEDALS
+        offset = 1;
+#endif
         switch (defaultTarget) {
 #if DEPENDENCY_CHAMPIONMEDALS
             case DefaultTargetMedalOptions::champion:
@@ -410,16 +416,16 @@ void UpdateCurrentTarget()
                 break;
 #endif
             case DefaultTargetMedalOptions::author:
-                maxTargetId = 3;
+                maxTargetId = 2 + offset;
                 break;
             case DefaultTargetMedalOptions::gold:
-                maxTargetId = 4;
+                maxTargetId = 3 + offset;
                 break;
             case DefaultTargetMedalOptions::silver:
-                maxTargetId = 5;
+                maxTargetId = 4 + offset;
                 break;
             default:
-                maxTargetId = 6;
+                maxTargetId = 5 + offset;
                 break;
         }
 
