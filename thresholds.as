@@ -9,14 +9,14 @@ namespace Thresholds {
     const string COLOR_POSITIVE = "070";
 
     const array<string> COLORS = {
-        "F60",
-        "F70",
-        "F81",
-        "F91",
-        "F92",
-        "FA2",
-        "FB3",
-        "FC3",
+        "f10",
+        "f30",
+        "f61",
+        "f82",
+        "fa3",
+        "fc4",
+        "fe5",
+        "ff6",
     };
 
     class Table {
