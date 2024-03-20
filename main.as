@@ -50,18 +50,18 @@ array<string> colors = {
 const string PB_TEXT = "\\$0ff" + Icons::User;
 const string CUSTOM_TEXT = "\\$c11" + Icons::Crosshairs;
 
-Record@ bronze  = Record(colors[0] + MEDAL_ICON);
-Record@ silver  = Record(colors[1] + MEDAL_ICON);
-Record@ gold    = Record(colors[2] + MEDAL_ICON);
-Record@ author  = Record(colors[3] + MEDAL_ICON);
+Target@ bronze  = Target(colors[0] + MEDAL_ICON);
+Target@ silver  = Target(colors[1] + MEDAL_ICON);
+Target@ gold    = Target(colors[2] + MEDAL_ICON);
+Target@ author  = Target(colors[3] + MEDAL_ICON);
 #if DEPENDENCY_CHAMPIONMEDALS
-Record@ champion  = Record(colors[4] + MEDAL_ICON);
+Target@ champion  = Target(colors[4] + MEDAL_ICON);
 #endif
 
-Record@ pb = Record(PB_TEXT, 0);
-Record@ custom = Record(CUSTOM_TEXT, 0);
+Target@ pb = Target(PB_TEXT, 0);
+Target@ custom = Target(CUSTOM_TEXT, 0);
 
-array<Record@> targets = {
+array<Target@> targets = {
     pb, // Should be first for correct target autoselection
     custom,
 #if DEPENDENCY_CHAMPIONMEDALS
@@ -73,7 +73,7 @@ array<Record@> targets = {
     bronze
 };
 
-Record@ currentTarget = null;
+Target@ currentTarget = null;
 
 
 
@@ -117,7 +117,7 @@ void RenderChangeTargetPopup()
     if (UI::BeginPopup(POPUP_CHANGE_TARGET)) {
         string text = TEXT_DEFAULT_TARGET;
         if (!autoChangeTarget && @currentTarget != null) {
-            text = currentTarget.style + currentTarget.icon + currentTarget.FormattedTime();
+            text = currentTarget.icon + currentTarget.FormattedTime();
         }
         if (UI::BeginCombo(Icons::ClockO, text)) {
             if (UI::Selectable(TEXT_DEFAULT_TARGET, autoChangeTarget)) {
@@ -126,11 +126,11 @@ void RenderChangeTargetPopup()
                 UI::CloseCurrentPopup();
             }
             for(uint i = 0; i < targets.Length; i++) {
-                Record @target = @targets[i];
+                Target @target = @targets[i];
                 if (target.time == 0) {
                     continue;
                 }            
-                if (UI::Selectable(target.style + target.icon + target.FormattedTime(), @target == @currentTarget)) {
+                if (UI::Selectable(target.icon + target.FormattedTime(), @target == @currentTarget)) {
                     print("Target change " + target.icon);
                     autoChangeTarget = false;
                     SetTarget(target);
@@ -288,22 +288,15 @@ void Render() {
         if(UI::BeginTable(TEXT_PLUGIN_NAME, numCols, UI::TableFlags::SizingFixedFit)) {
             
             // print(targets.Length);
-            for(uint i = 0; i < targets.Length; i++) {
-                if(targets[i].hidden) {
-                    continue;
-                }
-                UI::TableNextRow();
-                
+            UI::TableNextRow();
+            
+            if (@currentTarget != null) {
                 UI::TableNextColumn();
-                targets[i].DrawIcon();
-                
+                currentTarget.DrawIcon();
                 UI::TableNextColumn();
-                targets[i].DrawTime();
-
+                currentTarget.DrawTime();
                 UI::TableNextColumn();
-                if (@targets[i] == @currentTarget) {
-                    UI::Text(Icons::Flag);
-                }
+                UI::Text(Icons::Flag);
             }
 
             UI::TableNextRow();
@@ -449,13 +442,9 @@ void UpdateRecords()
     }
 }
 
-void SetTarget(Record @target) {
+void SetTarget(Target @target) {
     @currentTarget = target;
     print(target.icon);
-    for (uint i = 0; i < targets.Length; i++) {
-        targets[i].hidden = true;
-    }
-    currentTarget.hidden = false;
     UpdateRecords();
 }
 

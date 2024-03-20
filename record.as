@@ -28,8 +28,8 @@ class Record {
         return this.style + (this.time > 0 ? "\\$fff" + Time::Format(this.time) : "-:--.---");
     }
 
-    void UpdateDelta(Record@ other) {
-        this.delta = other.time - this.time;
+    void UpdateDelta(Target@ target) {
+        this.delta = target.time - this.time;
     }
     
     void DrawDelta() {
