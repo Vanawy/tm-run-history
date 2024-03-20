@@ -10,15 +10,5 @@ class Target {
     void DrawIcon() {
         UI::Text(this.icon);
     }
-
-    void DrawTime() {
-        UI::Text(this.FormattedTime());
-    }
-    
-    string FormattedTime() {
-        return (this.time > 0 ? "\\$fff" + Time::Format(this.time) : "-:--.---");
-    }
-
-
 }
 

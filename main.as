@@ -117,7 +117,7 @@ void RenderChangeTargetPopup()
     if (UI::BeginPopup(POPUP_CHANGE_TARGET)) {
         string text = TEXT_DEFAULT_TARGET;
         if (!autoChangeTarget && @currentTarget != null) {
-            text = currentTarget.icon + currentTarget.FormattedTime();
+            text = currentTarget.icon + "\\$fff" + Time::Format(currentTarget.time);
         }
         if (UI::BeginCombo(Icons::ClockO, text)) {
             if (UI::Selectable(TEXT_DEFAULT_TARGET, autoChangeTarget)) {
@@ -130,7 +130,10 @@ void RenderChangeTargetPopup()
                 if (target.time == 0) {
                     continue;
                 }            
-                if (UI::Selectable(target.icon + target.FormattedTime(), @target == @currentTarget)) {
+                if (UI::Selectable(
+                    target.icon + "\\$fff" + Time::Format(target.time), 
+                    @target == @currentTarget
+                )) {
                     print("Target change " + target.icon);
                     autoChangeTarget = false;
                     SetTarget(target);
@@ -294,7 +297,10 @@ void Render() {
                 UI::TableNextColumn();
                 currentTarget.DrawIcon();
                 UI::TableNextColumn();
-                currentTarget.DrawTime();
+                UI::Text(currentTarget.time > 0 
+                    ? "\\$fff" + Time::Format(currentTarget.time) 
+                    : "-:--.---"
+                );
                 UI::TableNextColumn();
                 UI::Text(Icons::Flag);
             }
