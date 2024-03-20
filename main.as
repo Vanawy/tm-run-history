@@ -293,17 +293,19 @@ void Render() {
             // print(targets.Length);
             UI::TableNextRow();
             
-            if (@currentTarget != null) {
                 UI::TableNextColumn();
+
+            if (@currentTarget != null && currentTarget.time > 0) {
                 currentTarget.DrawIcon();
                 UI::TableNextColumn();
-                UI::Text(currentTarget.time > 0 
-                    ? "\\$fff" + Time::Format(currentTarget.time) 
-                    : "-:--.---"
-                );
+                UI::Text("\\$fff" + Time::Format(currentTarget.time));
+            } else {
+                UI::Text(Icons::Spinner);
                 UI::TableNextColumn();
-                UI::Text(Icons::Flag);
+                UI::Text("-:--.---");
             }
+            UI::TableNextColumn();
+            UI::Text(Icons::Flag);
 
             UI::TableNextRow();
             for(uint i = 0; i < numCols; i++) {
