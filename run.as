@@ -1,4 +1,4 @@
-class Record {
+class Run {
     string icon;
     int time;
     string style;
@@ -7,9 +7,9 @@ class Record {
 
     string deltaTextOverride;
 
-    Record(){}
+    Run(){}
     
-    Record(string &in icon, int time = -1, string &in style = "\\$fff") {
+    Run(string &in icon, int time = -1, string &in style = "\\$fff") {
         this.icon = icon;
         this.time = time;
         this.style = style;

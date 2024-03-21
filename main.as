@@ -1,7 +1,9 @@
-[Setting category="General" name="Records Limit" description="Limit amount of records displayed in history"]
-uint recordsLimit = 10;
-[Setting category="General" name="PBs only" description="Save only PB records"]
+[Setting category="General" name="Limit" description="Limit amount of runs displayed in history"]
+uint runsLimit = 10;
+
+[Setting category="General" name="PBs only" description="Save only PB runs"]
 bool isPBOnly = false;
+
 [Setting category="General" name="Default target medal" description="Target medal chosen on map load"]
 DefaultTargetMedalOptions defaultTarget = DefaultTargetMedalOptions::closestNotBeaten;
 
@@ -20,7 +22,7 @@ string deltasString = DEFAULT_DELTAS;
 
 bool autoChangeTarget = true;
 
-array<Record> records;
+array<Run> runs;
 
 enum DefaultTargetMedalOptions {
     closestNotBeaten,
@@ -106,7 +108,7 @@ void RenderThresholdsTab()
     if (thresholdsTable.isChanged) {
         deltasString = thresholdsTable.ToString();
         thresholdsTable.isChanged = false;
-        UpdateRecords();
+        UpdateRuns();
     }
 }
 
@@ -218,29 +220,29 @@ void AddTime(int time)
         // Ignore non PB time if setting enabled
         return;
     }
-    int count = records.Length;
-    records.Resize(count + 1);
-    records[count].time = time;
+    int count = runs.Length;
+    runs.Resize(count + 1);
+    runs[count].time = time;
 
     if (isPBOnly && (pb.time < 1 || time < pb.time)) {
         int delta = pb.time - time;
         string color = "\\$0ff";
-        records[count].deltaTextOverride = color + "PB";
+        runs[count].deltaTextOverride = color + "PB";
         if (pb.time > 0 && delta > 0) {
-            records[count].deltaTextOverride = color + "-" + Time::Format(delta, true, false);
+            runs[count].deltaTextOverride = color + "-" + Time::Format(delta, true, false);
         }
     }
-    UpdateRecordDelta(records[count]);
-    count = records.Length;
+    UpdateRunDelta(runs[count]);
+    count = runs.Length;
     for (int i = 0; i < count; i++) {
-        records[i].hidden = false;
-        if (i < (count - recordsLimit)) {
-            records[i].hidden = true;
+        runs[i].hidden = false;
+        if (i < (count - runsLimit)) {
+            runs[i].hidden = true;
         }
     }
 }
 
-void UpdateRecordDelta(Record@ record) 
+void UpdateRunDelta(Run@ record) 
 {
     if (@currentTarget == null) {
         return;
@@ -249,9 +251,9 @@ void UpdateRecordDelta(Record@ record)
     record.style = "\\$" + thresholdsTable.GetColorByDelta(record.delta);
 }
 
-void ClearRecords() 
+void ClearRuns() 
 {
-    records.Resize(0);
+    runs.Resize(0);
 }
 
 void Render() {
@@ -313,24 +315,20 @@ void Render() {
                 UI::Separator();
             }
 
-            for(uint i = 0; i < records.Length; i++) {
-                if(records[i].hidden) {
+            for(uint i = 0; i < runs.Length; i++) {
+                if(runs[i].hidden) {
                     continue;
                 }
                 UI::TableNextRow();
                 
                 UI::TableNextColumn();
-                if (records[i].icon.Length > 0) {
-                    records[i].DrawIcon();
-                } else {
-                    UI::Text("" + (i + 1));
-                }
+                UI::Text("" + (i + 1));
                 
                 UI::TableNextColumn();
-                records[i].DrawTime();
+                runs[i].DrawTime();
 
                 UI::TableNextColumn();
-                records[i].DrawDelta();
+                runs[i].DrawDelta();
             };
             UI::EndTable();
         }
@@ -396,7 +394,7 @@ void UpdateChampionTime() {
 void UpdateCurrentTarget()
 {
     if (!autoChangeTarget) {
-        UpdateRecords();
+        UpdateRuns();
         return;
     } 
     if (defaultTarget == DefaultTargetMedalOptions::pb) {
@@ -443,17 +441,17 @@ void UpdateCurrentTarget()
     SetTarget(currentTarget);
 }
 
-void UpdateRecords()
+void UpdateRuns()
 {
-    for (int i = 0; i < int(records.Length); i++) {
-        UpdateRecordDelta(records[i]);
+    for (int i = 0; i < int(runs.Length); i++) {
+        UpdateRunDelta(runs[i]);
     }
 }
 
 void SetTarget(Target @target) {
     @currentTarget = target;
     print(target.icon);
-    UpdateRecords();
+    UpdateRuns();
 }
 
 string BoolToStr(bool value) {
@@ -473,7 +471,7 @@ void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost) {
 }
 
 void OnMapChange(CGameCtnChallenge@ map) {
-    ClearRecords();
+    ClearRuns();
 
     author.time = map.TMObjective_AuthorTime;
     print("AT detected: " + Time::Format(author.time));
@@ -509,6 +507,6 @@ void OnMapChange(CGameCtnChallenge@ map) {
 }
 
 void OnClearHistory() {
-    records.Resize(0);
+    runs.Resize(0);
 }
 
