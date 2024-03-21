@@ -58,7 +58,9 @@ namespace Thresholds {
         } 
 
         private string GetColor(int timeIndex) {
-            int colorIndex = Math::Round(float(timeIndex) / this.deltas.Length * (COLORS.Length - 1));
+            int colorIndex = 
+            int(Math::Round(float(timeIndex) / this.deltas.Length * (COLORS.Length - 1)));
+            
             return COLORS[colorIndex];
         }
 
@@ -73,7 +75,7 @@ namespace Thresholds {
                 UI::TableNextColumn();
                 UI::Text("\\$" + COLOR_NEGATIVE + "+" + Time::Format(69420));
 
-                for (int i = 0; i < this.deltas.Length; i++) {
+                for (uint i = 0; i < this.deltas.Length; i++) {
                     UI::TableNextRow();
                     UI::TableNextColumn();
                     UI::Text("#" + (i + 1));

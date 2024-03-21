@@ -162,9 +162,9 @@ void RenderAddTargetPopup()
             UI::Text("Add custom time");
         }
         newTime = UI::InputFloat("seconds", newTime, 0.005);
-        UI::Text("New time " + Time::Format(newTime * 1000.0));
+        UI::Text("New time " + Time::Format(int(newTime) * 1000));
         if (UI::Button(TEXT_ADD)) {
-            custom.time = newTime * 1000.0;
+            custom.time = int(newTime) * 1000;
             newTime = 0;
             custom.time = custom.time;
             SetTarget(custom); 
