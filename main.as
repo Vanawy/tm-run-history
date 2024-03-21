@@ -325,7 +325,7 @@ void Render() {
                 UI::Text("" + (i + 1));
                 
                 UI::TableNextColumn();
-                runs[i].DrawTime();
+                UI::Text("\\$fff" + Time::Format(runs[i].time));
 
                 UI::TableNextColumn();
                 runs[i].DrawDelta();
@@ -430,7 +430,12 @@ void UpdateCurrentTarget()
 
         @currentTarget = targets[1];
         for(uint i = 2; i <= maxTargetId; i++) {
-            if (currentTarget.time < 1 || (targets[i].time > 0 && (targets[i].time < pb.time || pb.time < 1) && targets[i].time > currentTarget.time)) {
+            if (
+                currentTarget.time < 1 
+                || (targets[i].time > 0 
+                && (targets[i].time < pb.time || pb.time < 1) 
+                && targets[i].time > currentTarget.time)
+            ) {
                 @currentTarget = @targets[i];
             }
         }

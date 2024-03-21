@@ -16,18 +16,6 @@ class Run {
         this.hidden = false;
     }
 
-    void DrawIcon() {
-        UI::Text(this.style + this.icon);
-    }
-
-    void DrawTime() {
-        UI::Text(this.FormattedTime());
-    }
-    
-    string FormattedTime() {
-        return this.style + (this.time > 0 ? "\\$fff" + Time::Format(this.time) : "-:--.---");
-    }
-
     void UpdateDelta(Target@ target) {
         this.delta = target.time - this.time;
     }
