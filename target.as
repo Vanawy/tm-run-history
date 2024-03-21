@@ -6,9 +6,5 @@ class Target {
         this.icon = icon;
         this.time = time;
     }
-
-    void DrawIcon() {
-        UI::Text(this.icon);
-    }
 }
 

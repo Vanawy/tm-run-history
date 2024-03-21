@@ -296,7 +296,7 @@ void Render() {
                 UI::TableNextColumn();
 
             if (@currentTarget != null && currentTarget.time > 0) {
-                currentTarget.DrawIcon();
+                UI::Text(currentTarget.icon);
                 UI::TableNextColumn();
                 UI::Text("\\$fff" + Time::Format(currentTarget.time));
             } else {
