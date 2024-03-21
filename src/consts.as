@@ -5,10 +5,13 @@ const string TEXT_CLEAR = "Clear history";
 const string TEXT_CHANGE = "Change target";
 const string TEXT_ADD = "Add target";
 
+
 // Icons
 const string ICON_CLEAR = Icons::Times;
 const string ICON_CHANGE = Icons::ClockO;
 const string ICON_ADD = Icons::Plus;
+const string ICON_PB = "\\$0ff" + Icons::User;
+const string ICON_CUSTOM_TARGET = "\\$c11" + Icons::Crosshairs;
 
 // Default values
 const string DEFAULT_DELTAS = '500|100';

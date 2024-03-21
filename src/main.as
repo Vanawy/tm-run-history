@@ -1,28 +1,4 @@
-[Setting category="General" name="Limit" description="Limit amount of runs displayed in history"]
-uint runsLimit = 10;
 
-[Setting category="General" name="PBs only" description="Save only PB runs"]
-bool isPBOnly = false;
-
-[Setting category="General" name="Default target medal" description="Target medal chosen on map load"]
-DefaultTargetMedalOptions defaultTarget = DefaultTargetMedalOptions::closestNotBeaten;
-
-
-[Setting category="Display" name="Window position"]
-vec2 anchor = vec2(0, 170);
-[Setting category="Display" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
-bool lockPosition = false;
-[Setting category="Display" name="Small action buttons"]
-bool smallButtons = true;
-[Setting category="Display" name="Hide with overlay"]
-bool hideWithOverlay = false;
-
-[Setting hidden]
-string deltasString = DEFAULT_DELTAS;
-
-bool autoChangeTarget = true;
-
-array<Run> runs;
 
 enum DefaultTargetMedalOptions {
     closestNotBeaten,
@@ -38,30 +14,16 @@ enum DefaultTargetMedalOptions {
 
 const string MEDAL_ICON = Icons::Circle;
 
-array<string> colors = {
-    "\\$964", // bronze medal
-    "\\$899", // silver medal
-    "\\$db4", // gold medal
-    "\\$071", // author medal
+Target@ bronze  = Target("\\$964" + MEDAL_ICON);
+Target@ silver  = Target("\\$899" + MEDAL_ICON);
+Target@ gold    = Target("\\$db4" + MEDAL_ICON);
+Target@ author  = Target( "\\$071" + MEDAL_ICON);
 #if DEPENDENCY_CHAMPIONMEDALS
-    "\\$f69", // champion medal
-#endif
-};
-
-
-const string PB_TEXT = "\\$0ff" + Icons::User;
-const string CUSTOM_TEXT = "\\$c11" + Icons::Crosshairs;
-
-Target@ bronze  = Target(colors[0] + MEDAL_ICON);
-Target@ silver  = Target(colors[1] + MEDAL_ICON);
-Target@ gold    = Target(colors[2] + MEDAL_ICON);
-Target@ author  = Target(colors[3] + MEDAL_ICON);
-#if DEPENDENCY_CHAMPIONMEDALS
-Target@ champion  = Target(colors[4] + MEDAL_ICON);
+Target@ champion  = Target("\\$f69" + MEDAL_ICON);
 #endif
 
-Target@ pb = Target(PB_TEXT, 0);
-Target@ custom = Target(CUSTOM_TEXT, 0);
+Target@ pb = Target(ICON_PB, 0);
+Target@ custom = Target(ICON_CUSTOM_TARGET, 0);
 
 array<Target@> targets = {
     pb, // Should be first for correct target autoselection
@@ -75,43 +37,11 @@ array<Target@> targets = {
     bronze
 };
 
+bool autoChangeTarget = true;
+
 Target@ currentTarget = null;
-
-
-
-[SettingsTab name="Feedback" icon="Bug"]
-void RenderFeedbackTab()
-{
-    UI::Text("Thank you for using " + TEXT_PLUGIN_NAME + "!");
-    UI::Text("To report issues or send feedback use buttons below " + "\\$f69" + Icons::Heart);
-
-    if (UI::Button("GitHub " + Icons::Github)) {
-        OpenBrowserURL("https://github.com/Vanawy/tm-run-history/issues");
-    }
-    if (UI::Button("Twitter " + Icons::Twitter)) {
-        OpenBrowserURL("https://twitter.com/vanawy");
-    }
-}
-
 Thresholds::Table thresholdsTable = Thresholds::Table();
-
-[SettingsTab name="Thresholds" icon="ClockO"]
-void RenderThresholdsTab()
-{
-    if (UI::Button("Reset to default")) {
-        deltasString = DEFAULT_DELTAS;
-        thresholdsTable.FromString(deltasString);
-    }
-    UI::Text("Configure delta time thresholds");
-    UI::NewLine();
-    thresholdsTable.Render();
-    if (thresholdsTable.isChanged) {
-        deltasString = thresholdsTable.ToString();
-        thresholdsTable.isChanged = false;
-        UpdateRuns();
-    }
-}
-
+History runs = History();
 
 void RenderChangeTargetPopup()
 {
@@ -162,9 +92,9 @@ void RenderAddTargetPopup()
             UI::Text("Add custom time");
         }
         newTime = UI::InputFloat("seconds", newTime, 0.005);
-        UI::Text("New time " + Time::Format(int(newTime) * 1000));
+        UI::Text("New time " + Time::Format(int(newTime * 1000)));
         if (UI::Button(TEXT_ADD)) {
-            custom.time = int(newTime) * 1000;
+            custom.time = int(newTime * 1000);
             newTime = 0;
             custom.time = custom.time;
             SetTarget(custom); 
@@ -179,32 +109,32 @@ void RenderActions()
     if (!UI::IsOverlayShown()) return;
 
     // UI::Columns(1);
-    if (UI::Button(smallButtons ? ICON_CLEAR : TEXT_CLEAR)) {
+    if (UI::Button(settingUseSmallButtons ? ICON_CLEAR : TEXT_CLEAR)) {
         OnClearHistory();
     }
-    if (smallButtons && UI::IsItemHovered(UI::HoveredFlags::None)) {
+    if (settingUseSmallButtons && UI::IsItemHovered(UI::HoveredFlags::None)) {
         UI::BeginTooltip();
         UI::Text(TEXT_CLEAR);
         UI::EndTooltip();
     }
-    if (smallButtons) {
+    if (settingUseSmallButtons) {
         UI::SameLine();
     }
-    if (UI::Button(smallButtons ? ICON_CHANGE : TEXT_CHANGE)) {
+    if (UI::Button(settingUseSmallButtons ? ICON_CHANGE : TEXT_CHANGE)) {
         UI::OpenPopup(POPUP_CHANGE_TARGET);
     }
-    if (smallButtons && UI::IsItemHovered(UI::HoveredFlags::None)) {
+    if (settingUseSmallButtons && UI::IsItemHovered(UI::HoveredFlags::None)) {
         UI::BeginTooltip();
         UI::Text(TEXT_CHANGE);
         UI::EndTooltip();
     }
-    if (smallButtons) {
+    if (settingUseSmallButtons) {
         UI::SameLine();
     }
-    if (UI::Button(smallButtons ? ICON_ADD : TEXT_ADD)) {
+    if (UI::Button(settingUseSmallButtons ? ICON_ADD : TEXT_ADD)) {
         UI::OpenPopup(POPUP_ADD_TARGET);
     }
-    if (smallButtons && UI::IsItemHovered(UI::HoveredFlags::None)) {
+    if (settingUseSmallButtons && UI::IsItemHovered(UI::HoveredFlags::None)) {
         UI::BeginTooltip();
         UI::Text(TEXT_ADD);
         UI::EndTooltip();
@@ -214,49 +144,8 @@ void RenderActions()
     RenderAddTargetPopup();
 }
 
-void AddTime(int time) 
+void Render() 
 {
-    if (isPBOnly && pb.time > 0 && time > pb.time) {
-        // Ignore non PB time if setting enabled
-        return;
-    }
-    int count = runs.Length;
-    runs.Resize(count + 1);
-    runs[count].time = time;
-
-    if (isPBOnly && (pb.time < 1 || time < pb.time)) {
-        int delta = pb.time - time;
-        string color = "\\$0ff";
-        runs[count].deltaTextOverride = color + "PB";
-        if (pb.time > 0 && delta > 0) {
-            runs[count].deltaTextOverride = color + "-" + Time::Format(delta, true, false);
-        }
-    }
-    UpdateRunDelta(runs[count]);
-    count = runs.Length;
-    for (int i = 0; i < count; i++) {
-        runs[i].hidden = false;
-        if (i < (count - runsLimit)) {
-            runs[i].hidden = true;
-        }
-    }
-}
-
-void UpdateRunDelta(Run@ record) 
-{
-    if (@currentTarget == null) {
-        return;
-    }
-    record.UpdateDelta(currentTarget);
-    record.style = "\\$" + thresholdsTable.GetColorByDelta(record.delta);
-}
-
-void ClearRuns() 
-{
-    runs.Resize(0);
-}
-
-void Render() {
     auto app = cast<CTrackMania@>(GetApp());
     
     auto map = app.RootMap;
@@ -265,15 +154,15 @@ void Render() {
         return;
     }
 
-    if (hideWithOverlay && !UI::IsOverlayShown()) {
+    if (settingWindowHideWithOverlay && !UI::IsOverlayShown()) {
         return;
     }
     
     if(map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
-        if(lockPosition) {
-            UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::Always);
+        if(settingWindowLockPosition) {
+            UI::SetNextWindowPos(int(settingWindowAnchor.x), int(settingWindowAnchor.y), UI::Cond::Always);
         } else {
-            UI::SetNextWindowPos(int(anchor.x), int(anchor.y), UI::Cond::FirstUseEver);
+            UI::SetNextWindowPos(int(settingWindowAnchor.x), int(settingWindowAnchor.y), UI::Cond::FirstUseEver);
         }
         
         int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
@@ -283,56 +172,11 @@ void Render() {
 
         UI::Begin("Run History", windowFlags);
         
-        if(!lockPosition) {
-            anchor = UI::GetWindowPos();
+        if(!settingWindowLockPosition) {
+            settingWindowAnchor = UI::GetWindowPos();
         }
         
-        UI::BeginGroup();
-
-        uint numCols = 3; 
-        if(UI::BeginTable(TEXT_PLUGIN_NAME, numCols, UI::TableFlags::SizingFixedFit)) {
-            
-            // print(targets.Length);
-            UI::TableNextRow();
-            
-                UI::TableNextColumn();
-
-            if (@currentTarget != null && currentTarget.time > 0) {
-                UI::Text(currentTarget.icon);
-                UI::TableNextColumn();
-                UI::Text("\\$fff" + Time::Format(currentTarget.time));
-            } else {
-                UI::Text(Icons::Spinner);
-                UI::TableNextColumn();
-                UI::Text("-:--.---");
-            }
-            UI::TableNextColumn();
-            UI::Text(Icons::Flag);
-
-            UI::TableNextRow();
-            for(uint i = 0; i < numCols; i++) {
-                UI::TableNextColumn();
-                UI::Separator();
-            }
-
-            for(uint i = 0; i < runs.Length; i++) {
-                if(runs[i].hidden) {
-                    continue;
-                }
-                UI::TableNextRow();
-                
-                UI::TableNextColumn();
-                UI::Text("" + (i + 1));
-                
-                UI::TableNextColumn();
-                UI::Text("\\$fff" + Time::Format(runs[i].time));
-
-                UI::TableNextColumn();
-                runs[i].DrawDelta();
-            };
-            UI::EndTable();
-        }
-        UI::EndGroup();
+        runs.Render();
 
         RenderActions();
         
@@ -340,7 +184,8 @@ void Render() {
     }
 }
 
-void Main() {
+void Main() 
+{
     string lastMapId = "";
     string lastGhostId = "";
 
@@ -351,7 +196,7 @@ void Main() {
 #endif
 
     // init delta thresholds table
-    thresholdsTable.FromString(deltasString);
+    thresholdsTable.FromString(settingDeltasSerialized);
 
     while(true) {
         sleep(1000);
@@ -397,7 +242,7 @@ void UpdateCurrentTarget()
         UpdateRuns();
         return;
     } 
-    if (defaultTarget == DefaultTargetMedalOptions::pb) {
+    if (settingDefaultTarget == DefaultTargetMedalOptions::pb) {
         @currentTarget = @pb;
     } else {
         uint maxTargetId = 1;
@@ -408,7 +253,7 @@ void UpdateCurrentTarget()
 #if DEPENDENCY_CHAMPIONMEDALS
         offset = 1;
 #endif
-        switch (defaultTarget) {
+        switch (settingDefaultTarget) {
 #if DEPENDENCY_CHAMPIONMEDALS
             case DefaultTargetMedalOptions::champion:
                 maxTargetId = 2;
@@ -448,39 +293,44 @@ void UpdateCurrentTarget()
 
 void UpdateRuns()
 {
-    for (int i = 0; i < int(runs.Length); i++) {
-        UpdateRunDelta(runs[i]);
-    }
+    runs.UpdateDeltaTimes(currentTarget, thresholdsTable);
 }
 
-void SetTarget(Target @target) {
+void SetTarget(Target @target) 
+{
     @currentTarget = target;
     print(target.icon);
     UpdateRuns();
 }
 
-string BoolToStr(bool value) {
+string BoolToStr(bool value) 
+{
     return value ? ("\\$0f0" + Icons::Check) : ("\\$f00" + Icons::Times);
 }
 
-void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost) {
+void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost) 
+{
     if (!ghost.IsLocalPlayer || ghost.IsPersonalBest) {
         return;
     }
     int lastTime = ghost.Result_Time;
-    AddTime(lastTime);
+
+    if (settingIsPBOnly && pb.time > 0 && lastTime > pb.time) {
+        
+    } else {   
+        runs.AddRun(Run(lastTime));
+    }
     if (pb.time < 1 || lastTime < pb.time) {
         pb.time = lastTime;
     }
     UpdateCurrentTarget();
 }
 
-void OnMapChange(CGameCtnChallenge@ map) {
-    ClearRuns();
+void OnMapChange(CGameCtnChallenge@ map) 
+{
+    runs.Clear();
 
     author.time = map.TMObjective_AuthorTime;
-    print("AT detected: " + Time::Format(author.time));
-
     bronze.time = map.TMObjective_BronzeTime;
     silver.time = map.TMObjective_SilverTime;
     gold.time   = map.TMObjective_GoldTime;
@@ -511,7 +361,8 @@ void OnMapChange(CGameCtnChallenge@ map) {
     UpdateCurrentTarget();
 }
 
-void OnClearHistory() {
-    runs.Resize(0);
+void OnClearHistory() 
+{
+    runs.Clear();
 }
 

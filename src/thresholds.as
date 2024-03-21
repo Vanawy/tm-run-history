@@ -37,11 +37,11 @@ namespace Thresholds {
         }
 
         string ToString() {
-            array<string> deltasStrings = {};
+            array<string> settingDeltasSerializeds = {};
             for (uint i = 0; i < this.deltas.Length; i++) {
-                deltasStrings.InsertLast("" + this.deltas[i]);
+                settingDeltasSerializeds.InsertLast("" + this.deltas[i]);
             }
-            return string::Join(deltasStrings, STRING_DELIMITER);
+            return string::Join(settingDeltasSerializeds, STRING_DELIMITER);
         }
         
         private void Add(int timeMs) {

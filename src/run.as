@@ -1,5 +1,5 @@
-class Run {
-    string icon;
+class Run 
+{
     int time;
     string style;
     bool hidden;
@@ -9,18 +9,19 @@ class Run {
 
     Run(){}
     
-    Run(string &in icon, int time = -1, string &in style = "\\$fff") {
-        this.icon = icon;
+    Run(int time = -1, string &in style = "\\$fff") {
         this.time = time;
         this.style = style;
         this.hidden = false;
     }
 
-    void UpdateDelta(Target@ target) {
+    void UpdateDelta(Target@ target) 
+    {
         this.delta = target.time - this.time;
     }
     
-    void DrawDelta() {
+    void DrawDelta() 
+    {
         if (deltaTextOverride.Length > 0) {
             UI::Text(deltaTextOverride);
             return;
