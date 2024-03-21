@@ -5,4 +5,4 @@ Shows history of last N finishes in current session with delta to closest medal 
 
 Supports [Champion Medal](https://openplanet.dev/plugin/championmedals)
 
-![This is an image](/data/RunHistory.png)
+![This is an image](/assets/RunHistory.png)
