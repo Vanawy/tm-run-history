@@ -2,6 +2,8 @@ class History
 {
     array<Run> runs;
 
+    int lastRunId = 0;
+
     History(){}
 
     void Clear() 
@@ -12,6 +14,11 @@ class History
     void AddRun(Run @newRun) 
     {
         int count = runs.Length;
+        lastRunId = newRun.id;
+
+        if (settingIsPBOnly && !newRun.isPB) {
+            return;
+        }
         runs.InsertLast(newRun);
 
         count = runs.Length;
@@ -36,10 +43,6 @@ class History
     }
 
     uint NextRunID() {
-        uint lastRunId = 0;
-        if (!runs.IsEmpty()) {
-            lastRunId = runs[runs.Length - 1].id;
-        }
         return lastRunId + 1;
     }
 
@@ -85,7 +88,11 @@ class History
                 UI::Text("\\$fff" + Time::Format(runs[i].time));
 
                 UI::TableNextColumn();
-                runs[i].DrawDelta();
+                if (settingIsPBOnly) {
+                    runs[i].DrawPBDelta();
+                } else {
+                    runs[i].DrawDelta();
+                }
             };
             UI::EndTable();
         }

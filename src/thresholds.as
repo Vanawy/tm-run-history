@@ -132,11 +132,11 @@ namespace Thresholds {
 
         string GetColorByDelta(int deltaTime) {
             string color = COLOR_NEGATIVE;
-            if (deltaTime > 0) {
+            if (deltaTime < 0) {
                 color = COLOR_POSITIVE;
             } else {
                 for (int i = this.deltas.Length - 1; i >= 0; i--) {
-                    if (-deltaTime < this.deltas[i]) {
+                    if (deltaTime < this.deltas[i]) {
                         return this.GetColor(i);
                     }
                 }

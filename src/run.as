@@ -9,8 +9,6 @@ class Run
     bool isPB = false;
     int pbDelta = 0;
 
-    string deltaTextOverride;
-
     Run(){}
     
     Run(uint id, int time = -1, string &in style = "\\$fff") {
@@ -25,23 +23,42 @@ class Run
         if (@currentTarget == null) {
             return;
         }
-        delta = target.time - time;
+        delta = time - target.time;
         style = "\\$" + thresholds.GetColorByDelta(delta);
     }
     
     void DrawDelta() 
     {
-        if (deltaTextOverride.Length > 0) {
-            UI::Text(deltaTextOverride);
-            return;
-        }
-        string sign = "-";
-        int delta = this.delta;
+        UI::Text(style + FormatDelta(delta));
+    }
+    
+    void DrawPBDelta() 
+    {
+        string sign = "+";
+        int delta = pbDelta;
         if (delta < 0) {
-            sign = "+";
+            sign = "-";
             delta *= -1;
         }
-        UI::Text(this.style + sign + Time::Format(delta));
+        string text = sign + Time::Format(delta);
+        if (isPB) {
+            string color = "\\$0ff";
+            text = color + "PB";
+            if (delta > 0) {
+                text = color + "-" + Time::Format(delta, true, false);
+            }
+        }
+        UI::Text(text);
+    }
+    
+    string FormatDelta(int delta) 
+    {
+        string sign = "+";
+        if (delta < 0) {
+            sign = "-";
+            delta *= -1;
+        }
+        return sign + Time::Format(delta);
     }
 
     string ToString()
