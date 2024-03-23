@@ -136,7 +136,7 @@ void RenderChangeTargetPopup()
             }
             for(uint i = 0; i < targets.Length; i++) {
                 Target @target = @targets[i];
-                if (target.time == 0) {
+                if (!target.hasTime()) {
                     continue;
                 }            
                 if (UI::Selectable(
@@ -247,7 +247,7 @@ void UpdateCurrentTarget()
         auto delta = pb.time - targets[i].time;
         if (delta > 0 && delta < smallestDelta) {
             smallestDelta = delta;
-            newTarget = targets[i];
+            @newTarget = @targets[i];
         }
     }
     
@@ -265,15 +265,17 @@ void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost)
     }
     int lastTime = ghost.Result_Time;
 
-    auto newRun = Run(0, lastTime);
-    if (!pb.hasTime()) {
-        auto pbDelta = lastTime - pb.time;
-        newRun.pbDelta = pbDelta;
-        print(pbDelta + "pb delta");
-        if (pbDelta > 0) {
-            pb.time = lastTime;
-            newRun.isPB = true;
-        }
+    auto newRun = Run(runs.NextRunID(), lastTime);
+
+    int pbDelta = 0;
+    if (pb.hasTime()) {
+        pbDelta = lastTime - pb.time;
+        newRun.pbDelta = lastTime - pb.time;
+    }
+    
+    if (pbDelta < 0 || !pb.hasTime()) {
+        pb.time = lastTime;
+        newRun.isPB = true;
     }
     newRun.Update(currentTarget, thresholdsTable);
     runs.AddRun(newRun);

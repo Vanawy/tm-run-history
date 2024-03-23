@@ -35,6 +35,14 @@ class History
         }
     }
 
+    uint NextRunID() {
+        uint lastRunId = 0;
+        if (!runs.IsEmpty()) {
+            lastRunId = runs[runs.Length - 1].id;
+        }
+        return lastRunId + 1;
+    }
+
     void Render(Target @target) 
     {
         UI::BeginGroup();
