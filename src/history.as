@@ -14,10 +14,6 @@ class History
         int count = runs.Length;
         runs.InsertLast(newRun);
 
-        if (@currentTarget != null) {
-            runs[count].UpdateDelta(currentTarget);
-        }
-
         count = runs.Length;
         for (int i = 0; i < count; i++) {
             runs[i].hidden = false;
@@ -29,18 +25,17 @@ class History
 
     void UpdateDeltaTimes(Target @target, Thresholds::Table @thresholds) 
     {
-        if (@currentTarget == null) {
+        if (@target == null) {
             return;
         }
 
         for (uint i = 0; i < runs.Length; i++) {
             Run@ run = runs[i];
-            run.UpdateDelta(target);
-            run.style = "\\$" + thresholds.GetColorByDelta(run.delta);
+            run.Update(target, thresholds);
         }
     }
 
-    void Render() 
+    void Render(Target @target) 
     {
         UI::BeginGroup();
         uint numCols = 3; 
@@ -51,10 +46,10 @@ class History
             
                 UI::TableNextColumn();
 
-            if (@currentTarget != null && currentTarget.time > 0) {
-                UI::Text(currentTarget.icon);
+            if (@target != null && target.time > 0) {
+                UI::Text(target.icon);
                 UI::TableNextColumn();
-                UI::Text("\\$fff" + Time::Format(currentTarget.time));
+                UI::Text("\\$fff" + Time::Format(target.time));
             } else {
                 UI::Text(Icons::Spinner);
                 UI::TableNextColumn();

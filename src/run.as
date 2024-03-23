@@ -1,23 +1,32 @@
 class Run 
 {
+    uint id;
     int time;
     string style;
     bool hidden;
     int delta;
 
+    bool isPB = false;
+    int pbDelta = 0;
+
     string deltaTextOverride;
 
     Run(){}
     
-    Run(int time = -1, string &in style = "\\$fff") {
+    Run(uint id, int time = -1, string &in style = "\\$fff") {
+        this.id = id;
         this.time = time;
         this.style = style;
         this.hidden = false;
     }
 
-    void UpdateDelta(Target@ target) 
+    void Update(Target@ target, Thresholds::Table@ thresholds) 
     {
-        this.delta = target.time - this.time;
+        if (@currentTarget == null) {
+            return;
+        }
+        delta = target.time - time;
+        style = "\\$" + thresholds.GetColorByDelta(delta);
     }
     
     void DrawDelta() 
@@ -33,6 +42,14 @@ class Run
             delta *= -1;
         }
         UI::Text(this.style + sign + Time::Format(delta));
+    }
+
+    string ToString()
+    {
+        return 
+            "Run #" + id + " " + Time::Format(time) + " "
+            + ICON_PB + "Δ: " + pbDelta + " isPB: " 
+            + (isPB ? Icons::Check : Icons::Times);
     }
 }
 

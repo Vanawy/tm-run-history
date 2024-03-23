@@ -47,8 +47,8 @@ void RenderThresholdsTab()
     UI::NewLine();
     thresholdsTable.Render();
     if (thresholdsTable.isChanged) {
-        settingDeltasSerialized = thresholdsTable.ToString();
         thresholdsTable.isChanged = false;
-        UpdateRuns();
+        settingDeltasSerialized = thresholdsTable.ToString();
+        OnThresholdsTableChange();
     }
 }

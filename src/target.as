@@ -6,5 +6,10 @@ class Target {
         this.icon = icon;
         this.time = time;
     }
+
+    bool hasTime()
+    {
+        return time > 0;
+    }
 }
 

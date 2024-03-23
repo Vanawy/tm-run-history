@@ -1,5 +1,3 @@
-
-
 enum DefaultTargetMedalOptions {
     closestNotBeaten,
     pb,
@@ -12,36 +10,115 @@ enum DefaultTargetMedalOptions {
     bronze,
 }
 
-const string MEDAL_ICON = Icons::Circle;
 
-Target@ bronze  = Target("\\$964" + MEDAL_ICON);
-Target@ silver  = Target("\\$899" + MEDAL_ICON);
-Target@ gold    = Target("\\$db4" + MEDAL_ICON);
-Target@ author  = Target( "\\$071" + MEDAL_ICON);
-#if DEPENDENCY_CHAMPIONMEDALS
-Target@ champion  = Target("\\$f69" + MEDAL_ICON);
-#endif
+Target@ currentTarget = null;
+Thresholds::Table thresholdsTable = Thresholds::Table();
+History runs = History();
 
-Target@ pb = Target(ICON_PB, 0);
-Target@ custom = Target(ICON_CUSTOM_TARGET, 0);
+Target@ pb          = Target("\\$0ff" + ICON_PB, 0);
+Target@ custom      = Target("\\$c11" + ICON_CUSTOM_TARGET, 0);
+Target@ bronze      = Target("\\$964" + ICON_MEDAL);
+Target@ silver      = Target("\\$899" + ICON_MEDAL);
+Target@ gold        = Target("\\$db4" + ICON_MEDAL);
+Target@ author      = Target("\\$071" + ICON_MEDAL);
+Target@ champion    = Target("\\$f69" + ICON_MEDAL);
 
 array<Target@> targets = {
-    pb, // Should be first for correct target autoselection
+    pb,
     custom,
-#if DEPENDENCY_CHAMPIONMEDALS
-    champion,
-#endif
     author,
     gold,
     silver,
     bronze
 };
 
+float inputNewTime = 0;
 bool autoChangeTarget = true;
 
-Target@ currentTarget = null;
-Thresholds::Table thresholdsTable = Thresholds::Table();
-History runs = History();
+
+void Main() 
+{
+#if DEPENDENCY_CHAMPIONMEDALS
+    print("ChampionMedals detected");
+#else
+    warn("ChampionMedals not installed");
+#endif
+
+    string lastMapId = "";
+    string lastGhostId = "";
+
+    // init delta thresholds table
+    thresholdsTable.FromString(settingDeltasSerialized);
+
+    
+#if DEPENDENCY_CHAMPIONMEDALS
+    targets.InsertLast(champion);
+#endif
+
+
+    while(true) {
+        sleep(1000);
+
+        auto gd = MLFeed::GetGhostData();
+        if (gd !is null && gd.Ghosts_V2 !is null && gd.NbGhosts != 0) {
+            auto lastGhost = @gd.Ghosts_V2[gd.NbGhosts - 1];
+            if (lastGhostId != lastGhost.IdName) {
+                lastGhostId = lastGhost.IdName;
+                OnNewGhost(lastGhost);
+            }
+        }
+
+        CTrackMania@ trackmania = cast<CTrackMania>(GetApp());
+        if (trackmania !is null) {
+            auto map = @trackmania.RootMap;
+            if (map !is null && lastMapId != map.MapInfo.MapUid) {
+                lastMapId = map.MapInfo.MapUid;
+                OnMapChange(map);
+            }
+        }
+    }
+}
+
+void Render() 
+{
+    auto trackmania = cast<CTrackMania@>(GetApp());
+    
+    auto map = trackmania.RootMap;
+    
+    if(!UI::IsGameUIVisible()) {
+        return;
+    }
+
+    if (settingWindowHideWithOverlay && !UI::IsOverlayShown()) {
+        return;
+    }
+    
+    if(map !is null && map.MapInfo.MapUid != "" && trackmania.Editor is null) {
+        if(settingWindowLockPosition) {
+            UI::SetNextWindowPos(int(settingWindowAnchor.x), int(settingWindowAnchor.y), UI::Cond::Always);
+        } else {
+            UI::SetNextWindowPos(int(settingWindowAnchor.x), int(settingWindowAnchor.y), UI::Cond::FirstUseEver);
+        }
+        
+        int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
+        if (!UI::IsOverlayShown()) {
+            windowFlags |= UI::WindowFlags::NoInputs;
+        }
+
+        UI::Begin("Run History", windowFlags);
+        
+        if(!settingWindowLockPosition) {
+            settingWindowAnchor = UI::GetWindowPos();
+        }
+        
+        runs.Render(currentTarget);
+
+        RenderActions();
+        
+        UI::End();
+    }
+}
+
 
 void RenderChangeTargetPopup()
 {
@@ -80,22 +157,19 @@ void RenderChangeTargetPopup()
     }
 }
 
-float newTime = 0;
 void RenderAddTargetPopup()
 {
     if (!UI::IsOverlayShown()) return;
     if (UI::BeginPopup(POPUP_ADD_TARGET)) {
-        if (custom.time > 0) {
+        if (custom.hasTime()) {
             UI::Text("Custom time - " + Time::Format(custom.time));
-            UI::Text("Change custom time");
-        } else {
-            UI::Text("Add custom time");
         }
-        newTime = UI::InputFloat("seconds", newTime, 0.005);
-        UI::Text("New time " + Time::Format(int(newTime * 1000)));
+
+        inputNewTime = UI::InputFloat("seconds", inputNewTime, 0.005);
+        UI::Text("New time " + Time::Format(int(inputNewTime * 1000)));
         if (UI::Button(TEXT_ADD)) {
-            custom.time = int(newTime * 1000);
-            newTime = 0;
+            custom.time = int(inputNewTime * 1000);
+            inputNewTime = 0;
             custom.time = custom.time;
             SetTarget(custom); 
         }
@@ -144,169 +218,45 @@ void RenderActions()
     RenderAddTargetPopup();
 }
 
-void Render() 
+
+void SetTarget(Target @target) 
 {
-    auto app = cast<CTrackMania@>(GetApp());
-    
-    auto map = app.RootMap;
-    
-    if(!UI::IsGameUIVisible()) {
+    if (@currentTarget == @target) {
         return;
     }
-
-    if (settingWindowHideWithOverlay && !UI::IsOverlayShown()) {
-        return;
-    }
-    
-    if(map !is null && map.MapInfo.MapUid != "" && app.Editor is null) {
-        if(settingWindowLockPosition) {
-            UI::SetNextWindowPos(int(settingWindowAnchor.x), int(settingWindowAnchor.y), UI::Cond::Always);
-        } else {
-            UI::SetNextWindowPos(int(settingWindowAnchor.x), int(settingWindowAnchor.y), UI::Cond::FirstUseEver);
-        }
-        
-        int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
-        if (!UI::IsOverlayShown()) {
-            windowFlags |= UI::WindowFlags::NoInputs;
-        }
-
-        UI::Begin("Run History", windowFlags);
-        
-        if(!settingWindowLockPosition) {
-            settingWindowAnchor = UI::GetWindowPos();
-        }
-        
-        runs.Render();
-
-        RenderActions();
-        
-        UI::End();
-    }
+    @currentTarget = target;
+    print("New target: " + target.icon);
+    runs.UpdateDeltaTimes(currentTarget, thresholdsTable);
 }
 
-void Main() 
-{
-    string lastMapId = "";
-    string lastGhostId = "";
-
-#if DEPENDENCY_CHAMPIONMEDALS
-    print("ChampionMedals detected");
-#else
-    warn("ChampionMedals not installed");
-#endif
-
-    // init delta thresholds table
-    thresholdsTable.FromString(settingDeltasSerialized);
-
-    while(true) {
-        sleep(1000);
-
-        auto gd = MLFeed::GetGhostData();
-        if (gd !is null && gd.Ghosts_V2 !is null && gd.NbGhosts != 0) {
-            auto lastGhost = @gd.Ghosts_V2[gd.NbGhosts - 1];
-            if (lastGhostId != lastGhost.IdName) {
-                lastGhostId = lastGhost.IdName;
-                OnNewGhost(lastGhost);
-            }
-        }
-
-        CTrackMania@ app = cast<CTrackMania>(GetApp());
-        if (app !is null) {
-            auto map = @app.RootMap;
-            if (map !is null && lastMapId != map.MapInfo.MapUid) {
-                lastMapId = map.MapInfo.MapUid;
-                OnMapChange(map);
-            }
-        }
-
-#if DEPENDENCY_CHAMPIONMEDALS
-        UpdateChampionTime();
-#endif
-    }
-}
-
-#if DEPENDENCY_CHAMPIONMEDALS
-void UpdateChampionTime() {
-    auto newTime = ChampionMedals::GetCMTime();
-    if (champion.time != int(newTime)) {
-        champion.time = newTime;
-        print("Champion Medal detected: " + Time::Format(champion.time));
-        UpdateCurrentTarget();
-    }
-}
-#endif
 
 void UpdateCurrentTarget()
 {
     if (!autoChangeTarget) {
-        UpdateRuns();
+        runs.UpdateDeltaTimes(currentTarget, thresholdsTable);
         return;
-    } 
-    if (settingDefaultTarget == DefaultTargetMedalOptions::pb) {
-        @currentTarget = @pb;
-    } else {
-        uint maxTargetId = 1;
+    }
 
-        // TODO: Refactor this in next update 
-        // HOTFIX
-        uint offset = 0;
-#if DEPENDENCY_CHAMPIONMEDALS
-        offset = 1;
-#endif
-        switch (settingDefaultTarget) {
-#if DEPENDENCY_CHAMPIONMEDALS
-            case DefaultTargetMedalOptions::champion:
-                maxTargetId = 2;
-                break;
-#endif
-            case DefaultTargetMedalOptions::author:
-                maxTargetId = 2 + offset;
-                break;
-            case DefaultTargetMedalOptions::gold:
-                maxTargetId = 3 + offset;
-                break;
-            case DefaultTargetMedalOptions::silver:
-                maxTargetId = 4 + offset;
-                break;
-            default:
-                maxTargetId = 5 + offset;
-                break;
+    Target @newTarget = @bronze;
+    int smallestDelta = bronze.time;
+
+    for (uint i = 0; i < targets.Length; i++) {
+        if (!targets[i].hasTime()) {
+            continue;
         }
-
-        @currentTarget = targets[1];
-        for(uint i = 2; i <= maxTargetId; i++) {
-            if (
-                currentTarget.time < 1 
-                || (targets[i].time > 0 
-                && (targets[i].time < pb.time || pb.time < 1) 
-                && targets[i].time > currentTarget.time)
-            ) {
-                @currentTarget = @targets[i];
-            }
+        auto delta = pb.time - targets[i].time;
+        if (delta > 0 && delta < smallestDelta) {
+            smallestDelta = delta;
+            newTarget = targets[i];
         }
     }
-    if (pb.time > 0 && currentTarget.time > pb.time) {
-        @currentTarget = @pb;
+    
+    if (pb.hasTime() && newTarget.time > pb.time) {
+        @newTarget = @pb;
     }
-    SetTarget(currentTarget);
+    SetTarget(newTarget);
 }
 
-void UpdateRuns()
-{
-    runs.UpdateDeltaTimes(currentTarget, thresholdsTable);
-}
-
-void SetTarget(Target @target) 
-{
-    @currentTarget = target;
-    print(target.icon);
-    UpdateRuns();
-}
-
-string BoolToStr(bool value) 
-{
-    return value ? ("\\$0f0" + Icons::Check) : ("\\$f00" + Icons::Times);
-}
 
 void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost) 
 {
@@ -315,14 +265,19 @@ void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost)
     }
     int lastTime = ghost.Result_Time;
 
-    if (settingIsPBOnly && pb.time > 0 && lastTime > pb.time) {
-        
-    } else {   
-        runs.AddRun(Run(lastTime));
+    auto newRun = Run(0, lastTime);
+    if (!pb.hasTime()) {
+        auto pbDelta = lastTime - pb.time;
+        newRun.pbDelta = pbDelta;
+        print(pbDelta + "pb delta");
+        if (pbDelta > 0) {
+            pb.time = lastTime;
+            newRun.isPB = true;
+        }
     }
-    if (pb.time < 1 || lastTime < pb.time) {
-        pb.time = lastTime;
-    }
+    newRun.Update(currentTarget, thresholdsTable);
+    runs.AddRun(newRun);
+    print("New run: " + newRun.ToString());
     UpdateCurrentTarget();
 }
 
@@ -334,12 +289,12 @@ void OnMapChange(CGameCtnChallenge@ map)
     bronze.time = map.TMObjective_BronzeTime;
     silver.time = map.TMObjective_SilverTime;
     gold.time   = map.TMObjective_GoldTime;
-#if DEPENDENCY_CHAMPIONMEDALS
     champion.time = 0;
-#endif
+    custom.time = 0;
+    pb.time = 0;
 
-    auto app = cast<CTrackMania@>(GetApp());
-    auto network = app.Network;
+    auto trackmania = cast<CTrackMania@>(GetApp());
+    auto network = trackmania.Network;
     if(network.ClientManiaAppPlayground !is null) {
         auto userMgr = network.ClientManiaAppPlayground.UserMgr;
         MwId userId;
@@ -353,16 +308,26 @@ void OnMapChange(CGameCtnChallenge@ map)
         uint newPbTime = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
         if (newPbTime != 0) {
             pb.time = newPbTime;
-            print("PB detected: " + Time::Format(pb.time));
+            print(pb.icon + Time::Format(pb.time));
         }
     }
-    custom.time = 0;
+#if DEPENDENCY_CHAMPIONMEDALS
+    auto newTime = ChampionMedals::GetCMTime();
+    if (champion.time != int(newTime)) {
+        champion.time = newTime;
+        print(champion.icon + Time::Format(champion.time));
+    }
+#endif
     
     UpdateCurrentTarget();
+}
+
+void OnThresholdsTableChange()
+{
+    runs.UpdateDeltaTimes(currentTarget, thresholdsTable);
 }
 
 void OnClearHistory() 
 {
     runs.Clear();
 }
-
