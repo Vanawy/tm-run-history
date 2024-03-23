@@ -9,6 +9,7 @@ class History
     void Clear() 
     {
         runs.Resize(0);
+        lastRunId = 0;
     }
 
     void AddRun(Run @newRun) 

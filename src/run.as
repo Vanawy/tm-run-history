@@ -43,7 +43,7 @@ class Run
         string text = sign + Time::Format(delta);
         if (isPB) {
             string color = "\\$0ff";
-            text = color + ICON_PB_STAR;
+            text = color + ICON_PB_STAR + " PB";
             if (settingIsPBOnly && delta > 0) {
                 text = color + "-" + Time::Format(delta, true, false);
             }

@@ -237,15 +237,28 @@ void UpdateCurrentTarget()
         return;
     }
 
+    if (settingDefaultTarget == DefaultTargetMedalOptions::pb) {
+        SetTarget(pb);
+        return;
+    }
+
     Target @newTarget = @bronze;
     int smallestDelta = bronze.time;
+    Target @defaultTarget = @bronze;
+    
+    if (settingDefaultTarget != DefaultTargetMedalOptions::closestNotBeaten) {
+        defaultTarget = GetDefaultTarget();
+    }
 
     for (uint i = 0; i < targets.Length; i++) {
         if (!targets[i].hasTime()) {
             continue;
         }
         auto delta = pb.time - targets[i].time;
-        if (delta > 0 && delta < smallestDelta) {
+        if (delta > 0 
+            && targets[i].time <= defaultTarget.time
+            && delta < smallestDelta
+        ) {
             smallestDelta = delta;
             @newTarget = @targets[i];
         }
@@ -257,6 +270,27 @@ void UpdateCurrentTarget()
     SetTarget(newTarget);
 }
 
+Target@ GetDefaultTarget()
+{
+    switch (settingDefaultTarget) {
+#if DEPENDENCY_CHAMPIONMEDALS
+        case DefaultTargetMedalOptions::champion:
+            if (champion.hasTime()) {
+                return @champion;
+            }
+#endif
+        case DefaultTargetMedalOptions::pb:
+            return @pb;
+        case DefaultTargetMedalOptions::author:
+            return @author;
+        case DefaultTargetMedalOptions::gold:
+            return @gold;
+        case DefaultTargetMedalOptions::silver:
+            return @silver;
+        default:
+            return @bronze;
+    }
+}
 
 void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost) 
 {
