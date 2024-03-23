@@ -88,7 +88,7 @@ class History
                 UI::Text("\\$fff" + Time::Format(runs[i].time));
 
                 UI::TableNextColumn();
-                if (settingIsPBOnly) {
+                if (settingIsPBOnly || (runs[i].isPB && runs[i].targetDelta == 0)) {
                     runs[i].DrawPBDelta();
                 } else {
                     runs[i].DrawDelta();

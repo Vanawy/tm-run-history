@@ -11,6 +11,7 @@ const string ICON_CLEAR = Icons::Times;
 const string ICON_CHANGE = Icons::ClockO;
 const string ICON_ADD = Icons::Plus;
 const string ICON_PB = Icons::User;
+const string ICON_PB_STAR = Icons::Kenney::Star;
 const string ICON_CUSTOM_TARGET = Icons::Crosshairs;
 const string ICON_MEDAL = Icons::Circle;
 

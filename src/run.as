@@ -4,7 +4,7 @@ class Run
     int time;
     string style;
     bool hidden;
-    int delta;
+    int targetDelta;
 
     bool isPB = false;
     int pbDelta = 0;
@@ -23,13 +23,13 @@ class Run
         if (@currentTarget == null) {
             return;
         }
-        delta = time - target.time;
-        style = "\\$" + thresholds.GetColorByDelta(delta);
+        targetDelta = time - target.time;
+        style = "\\$" + thresholds.GetColorByDelta(targetDelta);
     }
     
     void DrawDelta() 
     {
-        UI::Text(style + FormatDelta(delta));
+        UI::Text(style + FormatDelta(targetDelta));
     }
     
     void DrawPBDelta() 
@@ -43,8 +43,8 @@ class Run
         string text = sign + Time::Format(delta);
         if (isPB) {
             string color = "\\$0ff";
-            text = color + "PB";
-            if (delta > 0) {
+            text = color + ICON_PB_STAR;
+            if (settingIsPBOnly && delta > 0) {
                 text = color + "-" + Time::Format(delta, true, false);
             }
         }
