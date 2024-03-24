@@ -14,8 +14,26 @@ vec2 settingWindowAnchor = vec2(0, 170);
 bool settingWindowLockPosition = false;
 [Setting category="Display" name="Hide with overlay"]
 bool settingWindowHideWithOverlay = false;
+[Setting category="Display" name="Hide window"]
+bool settingWindowHide = false;
 [Setting category="Display" name="Small action buttons"]
 bool settingUseSmallButtons = true;
+[Setting category="Display" name="Hide action buttons"]
+bool settingUseHideButtons = false;
+
+
+[Setting category="Columns" name="Run number"]
+bool settingColumnShowRunId = true;
+[Setting category="Columns" name="Medal"]
+bool settingColumnShowMedal = false;
+[Setting category="Columns" name="Time"]
+bool settingColumnShowTime = true;
+[Setting category="Columns" name="Target Delta"]
+bool settingColumnShowDelta = true;
+[Setting category="Columns" name="PB Improvment"]
+bool settingColumnShowPBImprovment = false;
+[Setting category="Columns" name="No Respawn Time"]
+bool settingColumnShowNoRespawnTime = true;
 
 [Setting hidden]
 string settingDeltasSerialized = DEFAULT_DELTAS;

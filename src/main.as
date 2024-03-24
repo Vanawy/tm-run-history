@@ -89,6 +89,10 @@ void Render()
         return;
     }
 
+    if (settingWindowHide) {
+        return;
+    }
+
     if (settingWindowHideWithOverlay && !UI::IsOverlayShown()) {
         return;
     }
@@ -180,7 +184,7 @@ void RenderAddTargetPopup()
 
 void RenderActions()
 {
-    if (!UI::IsOverlayShown()) return;
+    if (!UI::IsOverlayShown() || settingUseHideButtons) return;
 
     // UI::Columns(1);
     if (UI::Button(settingUseSmallButtons ? ICON_CLEAR : TEXT_CLEAR)) {
