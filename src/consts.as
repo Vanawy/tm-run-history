@@ -14,6 +14,7 @@ const string ICON_PB = Icons::User;
 const string ICON_PB_STAR = Icons::Kenney::Star;
 const string ICON_CUSTOM_TARGET = Icons::Crosshairs;
 const string ICON_MEDAL = Icons::Circle;
+const string ICON_DELTA = "Δ";
 
 // Default values
 const string DEFAULT_DELTAS = '500|100';

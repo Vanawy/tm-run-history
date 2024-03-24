@@ -32,21 +32,15 @@ class Run
         UI::Text(style + FormatDelta(targetDelta));
     }
     
-    void DrawPBDelta() 
+    void DrawPBImprovment() 
     {
-        string sign = "+";
-        int delta = pbDelta;
-        if (delta < 0) {
-            sign = "-";
-            delta *= -1;
+        if (!isPB) {
+            return;
         }
-        string text = sign + Time::Format(delta);
-        if (isPB) {
-            string color = "\\$0ff";
-            text = color + "PB " + ICON_PB_STAR;
-            if (settingIsPBOnly && delta > 0) {
-                text = color + "-" + Time::Format(delta, true, false);
-            }
+        string color = "\\$0ff";
+        string text = color + "PB " + ICON_PB_STAR;
+        if (pbDelta < 0) {
+            text = color + "-" + Time::Format(-pbDelta, true, false);
         }
         UI::Text(text);
     }
@@ -65,7 +59,7 @@ class Run
     {
         return 
             "Run #" + id + " " + Time::Format(time) + " "
-            + ICON_PB + "Δ: " + pbDelta + " isPB: " 
+            + ICON_PB + ICON_DELTA + ": " + pbDelta + " isPB: " 
             + (isPB ? Icons::Check : Icons::Times);
     }
 }

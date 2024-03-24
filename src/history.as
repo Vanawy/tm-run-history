@@ -50,7 +50,7 @@ class History
     void Render(Target @target) 
     {
         UI::BeginGroup();
-        uint numCols = 3; 
+        uint numCols = 4; 
         if(UI::BeginTable(TEXT_PLUGIN_NAME, numCols, UI::TableFlags::SizingFixedFit)) {
             
             // print(targets.Length);
@@ -69,6 +69,8 @@ class History
             }
             UI::TableNextColumn();
             UI::Text(Icons::Flag);
+            UI::TableNextColumn();
+            UI::Text("\\$0ff" + Icons::ChevronUp);
 
             UI::TableNextRow();
             for(uint i = 0; i < numCols; i++) {
@@ -89,11 +91,9 @@ class History
                 UI::Text("\\$fff" + Time::Format(runs[i].time));
 
                 UI::TableNextColumn();
-                if (settingIsPBOnly || (runs[i].isPB && runs[i].targetDelta == 0)) {
-                    runs[i].DrawPBDelta();
-                } else {
-                    runs[i].DrawDelta();
-                }
+                runs[i].DrawDelta();
+                UI::TableNextColumn();
+                runs[i].DrawPBImprovment();
             };
             UI::EndTable();
         }
