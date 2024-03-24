@@ -13,15 +13,15 @@ enum DefaultTargetMedalOptions {
 
 Target@ currentTarget = null;
 Thresholds::Table thresholdsTable = Thresholds::Table();
-History runs = History();
+HistoryTable runs = HistoryTable();
 
-Target@ pb          = Target("\\$0ff" + ICON_PB, 0);
-Target@ custom      = Target("\\$c11" + ICON_CUSTOM_TARGET, 0);
-Target@ bronze      = Target("\\$964" + ICON_MEDAL);
-Target@ silver      = Target("\\$899" + ICON_MEDAL);
-Target@ gold        = Target("\\$db4" + ICON_MEDAL);
-Target@ author      = Target("\\$071" + ICON_MEDAL);
-Target@ champion    = Target("\\$f69" + ICON_MEDAL);
+Target@ pb          = Target(COLOR_PB, ICON_PB, 0);
+Target@ custom      = Target("\\$c11", ICON_CUSTOM_TARGET, 0);
+Target@ bronze      = Target(COLOR_BRONZE, ICON_MEDAL);
+Target@ silver      = Target(COLOR_SILVER, ICON_MEDAL);
+Target@ gold        = Target(COLOR_GOLD, ICON_MEDAL);
+Target@ author      = Target(COLOR_AUTHOR, ICON_MEDAL);
+Target@ champion    = Target(COLOR_CHAMPION, ICON_MEDAL);
 
 array<Target@> targets = {
     pb,
@@ -317,14 +317,29 @@ Target@ GetHardestMedalBeaten(int time)
     return newTarget;
 }
 
+int GetNoRespawnTime() {
+    auto raceData = MLFeed::GetRaceData_V4();
+    auto playerData = raceData.GetPlayer_V4(MLFeed::LocalPlayersName);
+    return playerData.LastTheoreticalCpTime;
+}
+
 void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost) 
 {
     if (!ghost.IsLocalPlayer || ghost.IsPersonalBest) {
         return;
     }
     int lastTime = ghost.Result_Time;
+    auto beaten = GetHardestMedalBeaten(lastTime);
 
-    auto newRun = Run(runs.NextRunID(), lastTime);
+    auto noRespawnTime = GetNoRespawnTime();
+    auto norespawnTarget = GetHardestMedalBeaten(noRespawnTime);
+
+
+    auto newRun = Run(runs.NextRunID(), lastTime, beaten, norespawnTarget);
+
+    if (noRespawnTime > 0 && noRespawnTime != lastTime) {
+        newRun.noRespawnTime = noRespawnTime;
+    }
 
     int pbDelta = 0;
     if (pb.hasTime()) {
@@ -336,9 +351,8 @@ void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost)
         pb.time = lastTime;
         newRun.isPB = true;
     }
+
     newRun.Update(currentTarget, thresholdsTable);
-    auto beatenTarget = GetHardestMedalBeaten(newRun.time);
-    newRun.medalIcon = beatenTarget.icon;
     runs.AddRun(newRun);
     
     print("New run: " + newRun.ToString());

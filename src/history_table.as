@@ -1,10 +1,10 @@
-class History 
+class HistoryTable
 {
     array<Run> runs;
 
     int lastRunId = 0;
 
-    History(){}
+    HistoryTable(){}
 
     void Clear() 
     {
@@ -50,29 +50,32 @@ class History
     void Render(Target @target) 
     {
         UI::BeginGroup();
-        uint numCols = 5; 
+        uint numCols = 6; 
         if(UI::BeginTable(TEXT_PLUGIN_NAME, numCols, UI::TableFlags::SizingFixedFit)) {
             
             // print(targets.Length);
             UI::TableNextRow();
+            UI::TableNextColumn();
             
-                UI::TableNextColumn();
-
+            string text = "";
             if (@target != null && target.time > 0) {
                 UI::Text(target.icon);
-                UI::TableNextColumn();
-                UI::Text("\\$fff" + Time::Format(target.time));
+                text = "\\$fff" + Time::Format(target.time);
             } else {
                 UI::Text(Icons::Spinner);
-                UI::TableNextColumn();
-                UI::Text("-:--.---");
+                text = "-:--.---";
             }
+
+            UI::TableNextColumn();
+            UI::Text(ICON_MEDAL);
+            UI::TableNextColumn();
+            UI::Text(text);
             UI::TableNextColumn();
             UI::Text(Icons::Flag);
             UI::TableNextColumn();
-            UI::Text("\\$0ff" + Icons::ChevronUp);
+            UI::Text(COLOR_PB + Icons::ChevronUp);
             UI::TableNextColumn();
-            UI::Text(ICON_MEDAL);
+            UI::Text(ICON_NORESPAWN);
 
             UI::TableNextRow();
             for(uint i = 0; i < numCols; i++) {
@@ -81,7 +84,8 @@ class History
             }
 
             for(uint i = 0; i < runs.Length; i++) {
-                if(runs[i].hidden) {
+                Run@ run = runs[i];
+                if(run.hidden) {
                     continue;
                 }
                 UI::TableNextRow();
@@ -90,14 +94,19 @@ class History
                 UI::Text("" + (i + 1));
                 
                 UI::TableNextColumn();
-                UI::Text("\\$fff" + Time::Format(runs[i].time));
+                UI::Text(run.beaten.icon);
 
                 UI::TableNextColumn();
-                runs[i].DrawDelta();
+                UI::Text("\\$fff" + Time::Format(run.time));
+
                 UI::TableNextColumn();
-                runs[i].DrawPBImprovment();
+                run.DrawDelta();
                 UI::TableNextColumn();
-                UI::Text(runs[i].medalIcon);
+                run.DrawPBImprovment();
+                UI::TableNextColumn();
+                if (run.noRespawnTime > 0) {
+                    UI::Text(run.noRespawn.color + Time::Format(run.noRespawnTime));
+                }
             };
             UI::EndTable();
         }

@@ -8,14 +8,21 @@ class Run
 
     bool isPB = false;
     int pbDelta = 0;
-    string medalIcon = "";
+    Target@ beaten;
+    Target@ noRespawn;
+    int noRespawnTime = 0;
 
     Run(){}
     
-    Run(uint id, int time = -1, string &in style = "\\$fff") {
+    Run(uint id, int time, Target@ beaten, Target@ noRespawn) {
         this.id = id;
         this.time = time;
-        this.style = style;
+        if (@beaten != null) {
+            @this.beaten = @beaten;
+        }
+        if (@noRespawn != null) {
+            @this.noRespawn = @noRespawn;
+        }
         this.hidden = false;
     }
 
@@ -38,10 +45,9 @@ class Run
         if (!isPB) {
             return;
         }
-        string color = "\\$0ff";
-        string text = color + "PB " + ICON_PB_STAR;
+        string text = COLOR_PB + "PB " + ICON_PB_STAR;
         if (pbDelta < 0) {
-            text = color + "-" + Time::Format(-pbDelta, true, false);
+            text = COLOR_PB + "-" + Time::Format(-pbDelta, true, false);
         }
         UI::Text(text);
     }
@@ -59,9 +65,11 @@ class Run
     string ToString()
     {
         return 
-            "Run #" + id + " " + Time::Format(time) + medalIcon + " \\$fff "
+            "Run #" + id + " " + Time::Format(time) + beaten.icon + " \\$fff "
             + ICON_PB + ICON_DELTA + ": " + pbDelta + " isPB: " 
-            + (isPB ? Icons::Check : Icons::Times);
+            + (isPB ? Icons::Check : Icons::Times)
+            + " No respawn time: " + Time::Format(noRespawnTime)
+        ;
     }
 }
 
