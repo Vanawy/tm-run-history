@@ -8,6 +8,7 @@ class Run
 
     bool isPB = false;
     int pbDelta = 0;
+    string medalIcon = "";
 
     Run(){}
     
@@ -58,7 +59,7 @@ class Run
     string ToString()
     {
         return 
-            "Run #" + id + " " + Time::Format(time) + " "
+            "Run #" + id + " " + Time::Format(time) + medalIcon + " \\$fff "
             + ICON_PB + ICON_DELTA + ": " + pbDelta + " isPB: " 
             + (isPB ? Icons::Check : Icons::Times);
     }

@@ -50,7 +50,7 @@ class History
     void Render(Target @target) 
     {
         UI::BeginGroup();
-        uint numCols = 4; 
+        uint numCols = 5; 
         if(UI::BeginTable(TEXT_PLUGIN_NAME, numCols, UI::TableFlags::SizingFixedFit)) {
             
             // print(targets.Length);
@@ -71,6 +71,8 @@ class History
             UI::Text(Icons::Flag);
             UI::TableNextColumn();
             UI::Text("\\$0ff" + Icons::ChevronUp);
+            UI::TableNextColumn();
+            UI::Text(ICON_MEDAL);
 
             UI::TableNextRow();
             for(uint i = 0; i < numCols; i++) {
@@ -94,6 +96,8 @@ class History
                 runs[i].DrawDelta();
                 UI::TableNextColumn();
                 runs[i].DrawPBImprovment();
+                UI::TableNextColumn();
+                UI::Text(runs[i].medalIcon);
             };
             UI::EndTable();
         }

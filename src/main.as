@@ -268,7 +268,7 @@ void UpdateCurrentTarget()
         @newTarget = @pb;
     }
     SetTarget(newTarget);
-}
+} 
 
 Target@ GetDefaultTarget()
 {
@@ -292,6 +292,31 @@ Target@ GetDefaultTarget()
     }
 }
 
+Target@ GetHardestMedalBeaten(int time) 
+{
+    array<Target@> medals = {
+        bronze,
+        silver,
+        gold,
+        author,
+        champion,
+    };
+
+    Target @newTarget = @bronze;
+
+    for (uint i = 1; i < medals.Length; i++) {
+        if (@medals[i] == null || !medals[i].hasTime()) {
+            continue;
+        }
+        auto delta = time - medals[i].time;
+        if (delta < 0) {
+            @newTarget = @medals[i];
+        }
+    }
+
+    return newTarget;
+}
+
 void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost) 
 {
     if (!ghost.IsLocalPlayer || ghost.IsPersonalBest) {
@@ -312,7 +337,10 @@ void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost)
         newRun.isPB = true;
     }
     newRun.Update(currentTarget, thresholdsTable);
+    auto beatenTarget = GetHardestMedalBeaten(newRun.time);
+    newRun.medalIcon = beatenTarget.icon;
     runs.AddRun(newRun);
+    
     print("New run: " + newRun.ToString());
     UpdateCurrentTarget();
 }
