@@ -47,6 +47,10 @@ class HistoryTable
         return lastRunId + 1;
     }
 
+    bool IsEmpty() {
+        return runs.IsEmpty();
+    }
+
     void Render(Target @target) 
     {
         // uint numCols = 6;

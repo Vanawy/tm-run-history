@@ -18,13 +18,13 @@ bool settingWindowHideWithOverlay = false;
 bool settingWindowHide = false;
 [Setting category="Display" name="Small action buttons"]
 bool settingUseSmallButtons = true;
-[Setting category="Display" name="Hide action buttons"]
+[Setting category="Display" name="Hide action buttons" description="Actions will stay accesible in Plugins tab in overlay"]
 bool settingUseHideButtons = false;
 
 
 [Setting category="Columns" name="Run number"]
 bool settingColumnShowRunId = true;
-[Setting category="Columns" name="Medal"]
+[Setting category="Columns" name="Medal"  description="Shows current target icon in header if Run number column is disabled"]
 bool settingColumnShowMedal = false;
 [Setting category="Columns" name="Time"]
 bool settingColumnShowTime = true;

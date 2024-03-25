@@ -1,5 +1,5 @@
 // Texts
-const string TEXT_PLUGIN_NAME = "RunHistory";
+const string TEXT_PLUGIN_NAME = "Run History";
 const string TEXT_DEFAULT_TARGET = "Default (closest target)";
 const string TEXT_CLEAR = "Clear history";
 const string TEXT_CHANGE = "Change target";
@@ -16,6 +16,7 @@ const string ICON_CUSTOM_TARGET = Icons::Crosshairs;
 const string ICON_MEDAL = Icons::Circle;
 const string ICON_DELTA = "Δ";
 const string ICON_NORESPAWN = Icons::Kenney::Backward;
+const string ICON_MENU = Icons::ListOl;
 
 // Default values
 const string DEFAULT_DELTAS = '500|100';

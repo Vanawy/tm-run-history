@@ -33,6 +33,8 @@ array<Target@> targets = {
 };
 
 float inputNewTime = 0;
+bool inputTriggerPopup = false;
+
 bool autoChangeTarget = true;
 
 
@@ -145,7 +147,7 @@ void RenderChangeTargetPopup()
                 }            
                 if (UI::Selectable(
                     target.icon + "\\$fff" + Time::Format(target.time), 
-                    @target == @currentTarget
+                    @target == @currentTarget && !autoChangeTarget
                 )) {
                     print("Target change " + target.icon);
                     autoChangeTarget = false;
@@ -182,8 +184,63 @@ void RenderAddTargetPopup()
 }
 
 
+void RenderMenu() {
+    if (UI::BeginMenu(ICON_MENU + " " + TEXT_PLUGIN_NAME)) {
+
+        string toggleVisibilityText = settingWindowHide 
+            ? Icons::Eye + " Show window"
+            : Icons::EyeSlash + " Hide window";
+        if (UI::MenuItem(toggleVisibilityText)) {
+            settingWindowHide = !settingWindowHide;
+        }
+
+        if (UI::BeginMenu(ICON_CLEAR + " " + TEXT_CLEAR)) {
+            if (UI::MenuItem("Clear.")) {
+                OnClearHistory();
+            }
+            UI::EndMenu();
+        }
+
+        if (UI::MenuItem(ICON_ADD + " " + TEXT_ADD)) {
+            inputTriggerPopup = true;
+        }
+
+        if (UI::BeginMenu(ICON_CHANGE + " " + TEXT_CHANGE)) {
+            if (UI::MenuItem(TEXT_DEFAULT_TARGET, "", autoChangeTarget)) {
+                autoChangeTarget = true;
+                UpdateCurrentTarget();
+            }
+            for(uint i = 0; i < targets.Length; i++) {
+                Target @target = @targets[i];
+                if (!target.hasTime()) {
+                    continue;
+                }            
+                if (UI::MenuItem(
+                    target.icon + " \\$fff" + Time::Format(target.time), 
+                    "",
+                    @target == @currentTarget && !autoChangeTarget
+                )) {
+                    print("Target change " + target.icon);
+                    autoChangeTarget = false;
+                    SetTarget(target);
+                }
+            }
+            UI::EndMenu();
+        }
+
+        UI::EndMenu();
+    }
+}
+
+
 void RenderActions()
 {
+    if (inputTriggerPopup) {
+        UI::OpenPopup(POPUP_ADD_TARGET);
+        inputTriggerPopup = false;
+    }
+    RenderAddTargetPopup();
+
     if (!UI::IsOverlayShown() || settingUseHideButtons) return;
 
     // UI::Columns(1);
@@ -219,7 +276,6 @@ void RenderActions()
     }
 
     RenderChangeTargetPopup();
-    RenderAddTargetPopup();
 }
 
 
