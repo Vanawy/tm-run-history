@@ -30,9 +30,15 @@ jobs:
           cp src/*.as tmp/
           cp info.toml tmp/
           cp LICENSE tmp/
+      -name: Get actual plugin version
+        uses: SebRollen/toml-action@v1.2.0
+        id: read_toml
+        with:
+          file: 'myfile.toml'
+          field: 'meta.version'
 
-      - name: Set tag env
-        run: echo "RELEASE_NAME=RunHistory${GITHUB_REF#refs/*/}.op" >> $GITHUB_ENV
+      - name: Set release name
+        run: echo "RELEASE_NAME=RunHistory${steps.read_toml.outputs.value}.op" >> $GITHUB_ENV
 
       - uses: TheDoctor0/zip-release@0.7.6
         with:
