@@ -452,6 +452,8 @@ void OnMapChange(CGameCtnChallenge@ map)
             print(pb.icon + Time::Format(pb.time));
         }
     }
+    UpdateCurrentTarget();
+    
 #if DEPENDENCY_CHAMPIONMEDALS
     UpdateChampionTime();
 #endif
