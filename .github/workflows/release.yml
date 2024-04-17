@@ -30,7 +30,7 @@ jobs:
           cp src/*.as tmp/
           cp info.toml tmp/
           cp LICENSE tmp/
-      -name: Get actual plugin version
+      - name: Get actual plugin version
         uses: SebRollen/toml-action@v1.2.0
         id: read_toml
         with:
