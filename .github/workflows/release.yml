@@ -38,7 +38,7 @@ jobs:
           field: 'meta.version'
 
       - name: Set release name
-        run: echo "RELEASE_NAME=RunHistory${steps.read_toml.outputs.value}.op" >> $GITHUB_ENV
+        run: echo "RELEASE_NAME=RunHistory${{ steps.read_toml.outputs.value }}.op" >> $GITHUB_ENV
 
       - uses: TheDoctor0/zip-release@0.7.6
         with:
