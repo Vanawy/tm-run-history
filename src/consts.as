@@ -36,4 +36,4 @@ const string COLOR_CHAMPION = "\\$f69";
 const string COLOR_NO_MEDAL = "\\$555";
 
 // other
-const uint MAX_CM_UPDATE_ATTEMPTS_PER_MAP = 10;
+const uint MAX_CM_UPDATE_ATTEMPTS_PER_MAP = 3;

@@ -38,7 +38,7 @@ bool inputTriggerPopup = false;
 
 bool autoChangeTarget = true;
 
-uint championMedalUpdateAttemptsLeft = MAX_CM_UPDATE_ATTEMPTS_PER_MAP;
+uint championMedalUpdateAttempts = 0;
 
 
 void Main() 
@@ -433,7 +433,7 @@ void OnMapChange(CGameCtnChallenge@ map)
     champion.time = 0;
     custom.time = 0;
     pb.time = 0;
-    championMedalUpdateAttemptsLeft = MAX_CM_UPDATE_ATTEMPTS_PER_MAP;
+    championMedalUpdateAttempts = 0;
 
     auto trackmania = cast<CTrackMania@>(GetApp());
     auto network = trackmania.Network;
@@ -463,17 +463,18 @@ void OnMapChange(CGameCtnChallenge@ map)
 #if DEPENDENCY_CHAMPIONMEDALS
 void UpdateChampionTime() {
     
-    while (champion.time <= 0 && championMedalUpdateAttemptsLeft > 0) {
-        championMedalUpdateAttemptsLeft -= 1;
-        print("champ upd");
+    while (champion.time <= 0
+        && championMedalUpdateAttempts < MAX_CM_UPDATE_ATTEMPTS_PER_MAP
+    ) {
+        championMedalUpdateAttempts += 1;
 
         auto newTime = ChampionMedals::GetCMTime();
         if (champion.time != int(newTime)) {
             champion.time = newTime;
-            print(champion.icon + Time::Format(champion.time));
+            print(champion.icon + Time::Format(champion.time) + " try#" + championMedalUpdateAttempts);
             UpdateCurrentTarget();
         }
-        sleep(1000);
+        sleep(1000 * championMedalUpdateAttempts);
     }
 
 }
