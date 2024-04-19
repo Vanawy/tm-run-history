@@ -14,6 +14,7 @@ const string ICON_PB = Icons::User;
 const string ICON_PB_STAR = Icons::Kenney::Star;
 const string ICON_CUSTOM_TARGET = Icons::Crosshairs;
 const string ICON_MEDAL = Icons::Circle;
+const string ICON_NO_MEDAL = Icons::CircleO;
 const string ICON_DELTA = "Δ";
 const string ICON_NORESPAWN = Icons::Kenney::Backward;
 const string ICON_MENU = Icons::ListOl;
@@ -32,6 +33,7 @@ const string COLOR_SILVER   = "\\$899";
 const string COLOR_GOLD     = "\\$db4";
 const string COLOR_AUTHOR   = "\\$071";
 const string COLOR_CHAMPION = "\\$f69";
+const string COLOR_NO_MEDAL = "\\$555";
 
 // other
 const uint MAX_CM_UPDATE_ATTEMPTS_PER_MAP = 10;

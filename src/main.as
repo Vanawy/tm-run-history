@@ -22,6 +22,7 @@ Target@ silver      = Target(COLOR_SILVER, ICON_MEDAL);
 Target@ gold        = Target(COLOR_GOLD, ICON_MEDAL);
 Target@ author      = Target(COLOR_AUTHOR, ICON_MEDAL);
 Target@ champion    = Target(COLOR_CHAMPION, ICON_MEDAL);
+Target@ no_medal    = Target(COLOR_NO_MEDAL, ICON_NO_MEDAL);
 
 array<Target@> targets = {
     pb,
@@ -364,7 +365,7 @@ Target@ GetHardestMedalBeaten(int time)
         champion,
     };
 
-    Target @newTarget = @bronze;
+    Target @newTarget = @no_medal;
 
     for (uint i = 1; i < medals.Length; i++) {
         if (@medals[i] == null || !medals[i].hasTime()) {
