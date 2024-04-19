@@ -383,6 +383,9 @@ Target@ GetHardestMedalBeaten(int time)
 int GetNoRespawnTime() {
     auto raceData = MLFeed::GetRaceData_V4();
     auto playerData = raceData.GetPlayer_V4(MLFeed::LocalPlayersName);
+    if (playerData is null) {
+        return 0;
+    }
     return playerData.LastTheoreticalCpTime;
 }
 
