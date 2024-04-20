@@ -367,7 +367,7 @@ Target@ GetHardestMedalBeaten(int time)
 
     Target @newTarget = @no_medal;
 
-    for (uint i = 1; i < medals.Length; i++) {
+    for (uint i = 0; i < medals.Length; i++) {
         if (@medals[i] == null || !medals[i].hasTime()) {
             continue;
         }
