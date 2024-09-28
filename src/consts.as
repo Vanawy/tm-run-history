@@ -33,7 +33,8 @@ const string COLOR_SILVER   = "\\$899";
 const string COLOR_GOLD     = "\\$db4";
 const string COLOR_AUTHOR   = "\\$071";
 const string COLOR_CHAMPION = "\\$f69";
+const string COLOR_WARRIOR  = "\\$3cf";
 const string COLOR_NO_MEDAL = "\\$555";
 
 // other
-const uint MAX_CM_UPDATE_ATTEMPTS_PER_MAP = 3;
+const uint MAX_CUSTOM_MEDAL_UPDATE_ATTEMPTS_PER_MAP = 3;

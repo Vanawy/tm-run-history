@@ -4,6 +4,9 @@ enum DefaultTargetMedalOptions {
 #if DEPENDENCY_CHAMPIONMEDALS
     champion,
 #endif
+#if DEPENDENCY_WARRIORMEDALS
+    warrior,
+#endif
     author,
     gold,
     silver,
@@ -22,6 +25,7 @@ Target@ silver      = Target(COLOR_SILVER, ICON_MEDAL);
 Target@ gold        = Target(COLOR_GOLD, ICON_MEDAL);
 Target@ author      = Target(COLOR_AUTHOR, ICON_MEDAL);
 Target@ champion    = Target(COLOR_CHAMPION, ICON_MEDAL);
+Target@ warrior     = Target(COLOR_WARRIOR, ICON_MEDAL);
 Target@ no_medal    = Target(COLOR_NO_MEDAL, ICON_NO_MEDAL);
 
 array<Target@> targets = {
@@ -43,11 +47,6 @@ uint championMedalUpdateAttempts = 0;
 
 void Main() 
 {
-#if DEPENDENCY_CHAMPIONMEDALS
-    print("ChampionMedals detected");
-#else
-    warn("ChampionMedals not installed");
-#endif
 
     string lastMapId = "";
     string lastGhostId = "";
@@ -56,8 +55,18 @@ void Main()
     thresholdsTable.FromString(settingDeltasSerialized);
 
     
+#if DEPENDENCY_WARRIORMEDALS
+    print("WarriorMedals detected");
+    targets.InsertAt(1, warrior);
+#else
+    warn("WarriorMedals not installed");
+#endif
+    
 #if DEPENDENCY_CHAMPIONMEDALS
+    print("ChampionMedals detected");
     targets.InsertAt(1, champion);
+#else
+    warn("ChampionMedals not installed");
 #endif
 
 
@@ -342,6 +351,12 @@ Target@ GetDefaultTarget()
                 return @champion;
             }
 #endif
+#if DEPENDENCY_WARRIORMEDALS
+        case DefaultTargetMedalOptions::warrior:
+            if (warrior.hasTime()) {
+                return @warrior;
+            }
+#endif
         case DefaultTargetMedalOptions::pb:
             return @pb;
         case DefaultTargetMedalOptions::author:
@@ -362,6 +377,7 @@ Target@ GetHardestMedalBeaten(int time)
         silver,
         gold,
         author,
+        warrior,
         champion,
     };
 
@@ -434,9 +450,9 @@ void OnMapChange(CGameCtnChallenge@ map)
     silver.time = map.TMObjective_SilverTime;
     gold.time   = map.TMObjective_GoldTime;
     champion.time = 0;
+    warrior.time = 0;
     custom.time = 0;
     pb.time = 0;
-    championMedalUpdateAttempts = 0;
 
     auto trackmania = cast<CTrackMania@>(GetApp());
     auto network = trackmania.Network;
@@ -459,29 +475,33 @@ void OnMapChange(CGameCtnChallenge@ map)
     UpdateCurrentTarget();
     
 #if DEPENDENCY_CHAMPIONMEDALS
-    UpdateChampionTime();
+    // UpdateChampionTime();
+    UpdateCustomMedalTime(champion, function() { return ChampionMedals::GetCMTime(); });
+#endif
+#if DEPENDENCY_WARRIORMEDALS
+    // UpdateWarriorTime();
+    UpdateCustomMedalTime(warrior, function() { return WarriorMedals::GetWMTimeAsync(); });
 #endif
 }
 
-#if DEPENDENCY_CHAMPIONMEDALS
-void UpdateChampionTime() {
-    
-    while (champion.time <= 0
-        && championMedalUpdateAttempts < MAX_CM_UPDATE_ATTEMPTS_PER_MAP
-    ) {
-        championMedalUpdateAttempts += 1;
+funcdef int MedalTimeCB();
 
-        auto newTime = ChampionMedals::GetCMTime();
-        if (champion.time != int(newTime)) {
-            champion.time = newTime;
-            print(champion.icon + Time::Format(champion.time) + " try#" + championMedalUpdateAttempts);
+void UpdateCustomMedalTime(Target @medal, MedalTimeCB @GetTime) {
+    int attempts = 0;
+    while (!medal.hasTime()
+        && attempts < MAX_CUSTOM_MEDAL_UPDATE_ATTEMPTS_PER_MAP
+    ) {
+        attempts += 1;
+
+        int newTime = GetTime();
+        if (medal.time != int(newTime)) {
+            medal.time = newTime;
+            print(medal.icon + Time::Format(medal.time) + " attempt#" + attempts);
             UpdateCurrentTarget();
         }
-        sleep(1000 * championMedalUpdateAttempts);
+        sleep(1000 * attempts);
     }
-
 }
-#endif
 
 
 void OnThresholdsTableChange()

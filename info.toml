@@ -2,8 +2,8 @@
 name        = "Run History"
 author      = "Vanawy"
 category    = "Overlay"
-version     = "0.5.3"
+version     = "0.6.0"
 
 [script]
 dependencies = ["MLHook", "MLFeedRaceData"]
-optional_dependencies = ["ChampionMedals"]
+optional_dependencies = ["ChampionMedals", "WarriorMedals"]
