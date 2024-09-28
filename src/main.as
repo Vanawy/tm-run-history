@@ -58,6 +58,7 @@ void Main()
 #if DEPENDENCY_WARRIORMEDALS
     print("WarriorMedals detected");
     targets.InsertAt(1, warrior);
+    warrior.color = WarriorMedals::GetColorStr();
 #else
     warn("WarriorMedals not installed");
 #endif
@@ -144,7 +145,7 @@ void RenderChangeTargetPopup()
     if (UI::BeginPopup(POPUP_CHANGE_TARGET)) {
         string text = TEXT_DEFAULT_TARGET;
         if (!autoChangeTarget && @currentTarget != null) {
-            text = currentTarget.icon + "\\$fff" + Time::Format(currentTarget.time);
+            text = currentTarget.coloredIcon() + "\\$fff" + Time::Format(currentTarget.time);
         }
         if (UI::BeginCombo(Icons::ClockO, text)) {
             if (UI::Selectable(TEXT_DEFAULT_TARGET, autoChangeTarget)) {
@@ -158,10 +159,10 @@ void RenderChangeTargetPopup()
                     continue;
                 }            
                 if (UI::Selectable(
-                    target.icon + "\\$fff" + Time::Format(target.time), 
+                    target.coloredIcon() + "\\$fff" + Time::Format(target.time), 
                     @target == @currentTarget && !autoChangeTarget
                 )) {
-                    print("Target change " + target.icon);
+                    print("Target change " + target.coloredIcon());
                     autoChangeTarget = false;
                     SetTarget(target);
                     UI::CloseCurrentPopup();
@@ -228,11 +229,11 @@ void RenderMenu() {
                     continue;
                 }            
                 if (UI::MenuItem(
-                    target.icon + " \\$fff" + Time::Format(target.time), 
+                    target.coloredIcon() + " \\$fff" + Time::Format(target.time), 
                     "",
                     @target == @currentTarget && !autoChangeTarget
                 )) {
-                    print("Target change " + target.icon);
+                    print("Target change " + target.coloredIcon());
                     autoChangeTarget = false;
                     SetTarget(target);
                 }
@@ -297,7 +298,7 @@ void SetTarget(Target @target)
         return;
     }
     @currentTarget = target;
-    print("New target: " + target.icon);
+    print("New target: " + target.coloredIcon());
     runs.UpdateDeltaTimes(currentTarget, thresholdsTable);
 }
 
@@ -469,17 +470,15 @@ void OnMapChange(CGameCtnChallenge@ map)
         uint newPbTime = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
         if (newPbTime != 0) {
             pb.time = newPbTime;
-            print(pb.icon + Time::Format(pb.time));
+            print(pb.coloredIcon() + Time::Format(pb.time));
         }
     }
     UpdateCurrentTarget();
     
 #if DEPENDENCY_CHAMPIONMEDALS
-    // UpdateChampionTime();
     UpdateCustomMedalTime(champion, function() { return ChampionMedals::GetCMTime(); });
 #endif
 #if DEPENDENCY_WARRIORMEDALS
-    // UpdateWarriorTime();
     UpdateCustomMedalTime(warrior, function() { return WarriorMedals::GetWMTimeAsync(); });
 #endif
 }
@@ -496,7 +495,7 @@ void UpdateCustomMedalTime(Target @medal, MedalTimeCB @GetTime) {
         int newTime = GetTime();
         if (medal.time != int(newTime)) {
             medal.time = newTime;
-            print(medal.icon + Time::Format(medal.time) + " attempt#" + attempts);
+            print(medal.coloredIcon() + Time::Format(medal.time) + " attempt#" + attempts);
             UpdateCurrentTarget();
         }
         sleep(1000 * attempts);

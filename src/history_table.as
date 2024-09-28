@@ -77,7 +77,7 @@ class HistoryTable
             string formattedTime = "";
             string icon = "";
             if (@target != null && target.time > 0) {
-                icon = target.icon;
+                icon = target.coloredIcon();
                 formattedTime = "\\$fff" + Time::Format(target.time);
             } else {
                 icon = Icons::Spinner;
@@ -132,7 +132,7 @@ class HistoryTable
                 }
                 if (settingColumnShowMedal) {
                     UI::TableNextColumn();
-                    UI::Text(run.beaten.icon);
+                    UI::Text(run.beaten.coloredIcon());
                 }
                 if (settingColumnShowTime) {
                     UI::TableNextColumn();

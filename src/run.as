@@ -65,7 +65,7 @@ class Run
     string ToString()
     {
         return 
-            "Run #" + id + " " + Time::Format(time) + beaten.icon + " \\$fff "
+            "Run #" + id + " " + Time::Format(time) + beaten.coloredIcon() + " \\$fff "
             + ICON_PB + ICON_DELTA + ": " + pbDelta + " isPB: " 
             + (isPB ? Icons::Check : Icons::Times)
             + " No respawn time: " + Time::Format(noRespawnTime)

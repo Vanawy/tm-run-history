@@ -5,8 +5,13 @@ class Target {
     
     Target(string &in color, string &in icon, int time = 0) {
         this.color = color;
-        this.icon = color + icon;
+        this.icon = icon;
         this.time = time;
+    }
+
+    string coloredIcon()
+    {
+        return color + icon;
     }
 
     bool hasTime()
