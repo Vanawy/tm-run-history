@@ -7,6 +7,6 @@ Shows history of last N finishes in current session with delta to closest medal 
 
 Requires [MLHook](https://openplanet.dev/plugin/mlhook) and [MLFeed](https://openplanet.dev/plugin/mlfeedracedata)
 
-Supports [Champion Medal](https://openplanet.dev/plugin/championmedals)
+Supports [Champion Medals](https://openplanet.dev/plugin/championmedals) and [Warrior Medals](https://github.com/ezio416/tm-warrior-medals/)
 
 ![This is an image](/assets/RunHistory.png)
