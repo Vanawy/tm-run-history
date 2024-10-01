@@ -44,6 +44,7 @@ bool autoChangeTarget = true;
 
 uint championMedalUpdateAttempts = 0;
 
+CTrackMania@ trackmania = cast<CTrackMania>(GetApp());
 
 void Main() 
 {
@@ -51,10 +52,11 @@ void Main()
     string lastMapId = "";
     string lastGhostId = "";
 
+    print("App loaded");
+
     // init delta thresholds table
     thresholdsTable.FromString(settingDeltasSerialized);
 
-    
 #if DEPENDENCY_WARRIORMEDALS
     print("WarriorMedals detected");
     targets.InsertAt(1, warrior);
@@ -72,7 +74,7 @@ void Main()
 
 
     while(true) {
-        sleep(1000);
+        yield();
 
         auto gd = MLFeed::GetGhostData();
         if (gd !is null && gd.Ghosts_V2 !is null && gd.NbGhosts != 0) {
@@ -83,21 +85,16 @@ void Main()
             }
         }
 
-        CTrackMania@ trackmania = cast<CTrackMania>(GetApp());
-        if (trackmania !is null) {
-            auto map = @trackmania.RootMap;
-            if (map !is null && lastMapId != map.MapInfo.MapUid) {
-                lastMapId = map.MapInfo.MapUid;
-                OnMapChange(map);
-            }
+        auto map = @trackmania.RootMap;
+        if (map !is null && lastMapId != map.MapInfo.MapUid) {
+            lastMapId = map.MapInfo.MapUid;
+            OnMapChange(map);
         }
     }
 }
 
 void Render() 
-{
-    auto trackmania = cast<CTrackMania@>(GetApp());
-    
+{    
     auto map = trackmania.RootMap;
     
     if(!UI::IsGameUIVisible()) {
@@ -198,8 +195,8 @@ void RenderAddTargetPopup()
 
 
 void RenderMenu() {
-    if (UI::BeginMenu(ICON_MENU + " " + TEXT_PLUGIN_NAME)) {
 
+    if (UI::BeginMenu(ICON_MENU + " " + TEXT_PLUGIN_NAME)) {
         string toggleVisibilityText = settingWindowHide 
             ? Icons::Eye + " Show window"
             : Icons::EyeSlash + " Hide window";
