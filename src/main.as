@@ -44,15 +44,14 @@ bool autoChangeTarget = true;
 
 uint championMedalUpdateAttempts = 0;
 
-CTrackMania@ trackmania = cast<CTrackMania>(GetApp());
+bool isWindowVisible = false;
 
 void Main() 
 {
 
     string lastMapId = "";
     string lastGhostId = "";
-
-    print("App loaded");
+    CTrackMania@ trackmania = cast<CTrackMania>(GetApp());
 
     // init delta thresholds table
     thresholdsTable.FromString(settingDeltasSerialized);
@@ -86,17 +85,22 @@ void Main()
         }
 
         auto map = @trackmania.RootMap;
-        if (map !is null && lastMapId != map.MapInfo.MapUid) {
-            lastMapId = map.MapInfo.MapUid;
-            OnMapChange(map);
+        isWindowVisible = false;
+        if (map !is null) {
+            isWindowVisible = map.MapInfo.MapUid != "";
+            if (trackmania.Editor !is null) {
+                isWindowVisible = false;
+            }
+            if (lastMapId != map.MapInfo.MapUid) {
+                lastMapId = map.MapInfo.MapUid;
+                OnMapChange(map);
+            }
         }
     }
 }
 
 void Render() 
 {    
-    auto map = trackmania.RootMap;
-    
     if(!UI::IsGameUIVisible()) {
         return;
     }
@@ -109,7 +113,7 @@ void Render()
         return;
     }
     
-    if(map !is null && map.MapInfo.MapUid != "" && trackmania.Editor is null) {
+    if(isWindowVisible) {
         if(settingWindowLockPosition) {
             UI::SetNextWindowPos(int(settingWindowAnchor.x), int(settingWindowAnchor.y), UI::Cond::Always);
         } else {
