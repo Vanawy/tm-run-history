@@ -61,7 +61,8 @@ class HistoryTable
             (settingColumnShowTime ? 1 : 0) +
             (settingColumnShowDelta ? 1 : 0) +
             (settingColumnShowPBImprovment ? 1 : 0) +
-            (settingColumnShowNoRespawnTime ? 1 : 0);
+            (settingColumnShowNoRespawnTime ? 1 : 0) +
+            (settingColumnShowRespawns ? 1 : 0);
 
         if (numCols < 1) {
             return;
@@ -111,6 +112,10 @@ class HistoryTable
                 UI::TableNextColumn();
                 UI::Text(ICON_NORESPAWN);
             }
+            if (settingColumnShowRespawns) {
+                UI::TableNextColumn();
+                UI::Text(ICON_RESPAWN);
+            }
 
             UI::TableNextRow();
             for(uint i = 0; i < numCols; i++) {
@@ -119,7 +124,10 @@ class HistoryTable
             }
 
             for(uint i = 0; i < runs.Length; i++) {
-                Run@ run = runs[i];
+                Run@ run = @runs[i];
+                if (settingNewRunsFirst) {
+                    @run = @runs[runs.Length - 1 - i];
+                }
                 if(run.hidden) {
                     continue;
                 }
@@ -128,7 +136,7 @@ class HistoryTable
 
                 if (settingColumnShowRunId) {
                     UI::TableNextColumn();
-                    UI::Text("" + (i + 1));
+                    UI::Text("" + run.id);
                 }
                 if (settingColumnShowMedal) {
                     UI::TableNextColumn();
@@ -150,6 +158,12 @@ class HistoryTable
                     UI::TableNextColumn();
                     if (run.noRespawnTime > 0) {
                         UI::Text(run.noRespawn.color + Time::Format(run.noRespawnTime));
+                    }
+                }
+                if (settingColumnShowRespawns) {
+                    UI::TableNextColumn();
+                    if (run.respawns > 0) {
+                        UI::Text("" + run.respawns);
                     }
                 }
             }

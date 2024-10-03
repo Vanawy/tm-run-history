@@ -20,6 +20,8 @@ bool settingWindowHide = false;
 bool settingUseSmallButtons = true;
 [Setting category="Display" name="Hide action buttons" description="Actions will stay accesible in Plugins tab in overlay"]
 bool settingUseHideButtons = false;
+[Setting category="Display" name="New Runs first" description="Show new runs at the top"]
+bool settingNewRunsFirst = false;
 
 
 [Setting category="Columns" name="Run number"]
@@ -34,6 +36,8 @@ bool settingColumnShowDelta = true;
 bool settingColumnShowPBImprovment = false;
 [Setting category="Columns" name="No Respawn Time"]
 bool settingColumnShowNoRespawnTime = true;
+[Setting category="Columns" name="Number of respawns"]
+bool settingColumnShowRespawns = true;
 
 [Setting hidden]
 string settingDeltasSerialized = DEFAULT_DELTAS;

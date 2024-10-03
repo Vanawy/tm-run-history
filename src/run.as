@@ -11,17 +11,16 @@ class Run
     Target@ beaten;
     Target@ noRespawn;
     int noRespawnTime = 0;
+    int respawns = 0;
+    int grindTime = 0;
 
     Run(){}
     
-    Run(uint id, int time, Target@ beaten, Target@ noRespawn) {
+    Run(uint id, int time, Target@ beaten) {
         this.id = id;
         this.time = time;
         if (@beaten != null) {
             @this.beaten = @beaten;
-        }
-        if (@noRespawn != null) {
-            @this.noRespawn = @noRespawn;
         }
         this.hidden = false;
     }
@@ -69,6 +68,8 @@ class Run
             + ICON_PB + ICON_DELTA + ": " + pbDelta + " isPB: " 
             + (isPB ? Icons::Check : Icons::Times)
             + " No respawn time: " + Time::Format(noRespawnTime)
+            + " Respawns: " + respawns
+            + " Grind time: " + Time::Format(grindTime)
         ;
     }
 }

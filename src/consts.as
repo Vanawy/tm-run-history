@@ -18,6 +18,9 @@ const string ICON_NO_MEDAL = Icons::CircleO;
 const string ICON_DELTA = "Δ";
 const string ICON_NORESPAWN = Icons::Kenney::Backward;
 const string ICON_MENU = Icons::ListOl;
+const string ICON_RESPAWN = Icons::Refresh;
+const string ICON_DNF = Icons::Repeat;
+const string ICON_GRIND_TIME = Icons::ClockO;
 
 // Default values
 const string DEFAULT_DELTAS = '500|100';

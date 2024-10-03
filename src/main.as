@@ -398,15 +398,6 @@ Target@ GetHardestMedalBeaten(int time)
     return newTarget;
 }
 
-int GetNoRespawnTime() {
-    auto raceData = MLFeed::GetRaceData_V4();
-    auto playerData = raceData.GetPlayer_V4(MLFeed::LocalPlayersName);
-    if (playerData is null) {
-        return 0;
-    }
-    return playerData.LastTheoreticalCpTime;
-}
-
 void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost) 
 {
     if (!ghost.IsLocalPlayer || ghost.IsPersonalBest) {
@@ -415,14 +406,26 @@ void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost)
     int lastTime = ghost.Result_Time;
     auto beaten = GetHardestMedalBeaten(lastTime);
 
-    auto noRespawnTime = GetNoRespawnTime();
-    auto norespawnTarget = GetHardestMedalBeaten(noRespawnTime);
 
 
-    auto newRun = Run(runs.NextRunID(), lastTime, beaten, norespawnTarget);
+    auto newRun = Run(runs.NextRunID(), lastTime, beaten);
 
-    if (noRespawnTime > 0 && noRespawnTime != lastTime) {
-        newRun.noRespawnTime = noRespawnTime;
+    
+    auto raceData = MLFeed::GetRaceData_V4();
+    auto playerData = raceData.GetPlayer_V4(MLFeed::LocalPlayersName);
+    if (playerData !is null) {
+        auto noRespawnTime = playerData.LastTheoreticalCpTime;
+        auto norespawnTarget = GetHardestMedalBeaten(noRespawnTime);
+        
+        if (@norespawnTarget != null) {
+            @newRun.noRespawn = @norespawnTarget;
+        }
+    
+        if (noRespawnTime > 0 && noRespawnTime != lastTime) {
+            newRun.noRespawnTime = noRespawnTime;
+        }
+
+        newRun.respawns = playerData.NbRespawnsRequested;
     }
 
     int pbDelta = 0;
