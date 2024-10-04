@@ -3,8 +3,8 @@ class Run
     uint id;
     int time;
     string style;
-    bool hidden;
-    int targetDelta;
+    bool hidden = true;
+    int targetDelta = 0;
 
     bool isPB = false;
     int pbDelta = 0;
@@ -13,6 +13,7 @@ class Run
     int noRespawnTime = 0;
     int respawns = 0;
     int grindTime = 0;
+    bool isDNF = false;
 
     Run(){}
     
@@ -36,6 +37,9 @@ class Run
     
     void DrawDelta() 
     {
+        if (isDNF) {
+            return;
+        }
         UI::Text(style + FormatDelta(targetDelta));
     }
     
@@ -63,6 +67,9 @@ class Run
 
     string ToString()
     {
+        if (isDNF) {
+            return "Run #" + id + " DNF";
+        }
         return 
             "Run #" + id + " " + Time::Format(time) + beaten.coloredIcon() + " \\$fff "
             + ICON_PB + ICON_DELTA + ": " + pbDelta + " isPB: " 

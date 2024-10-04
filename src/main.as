@@ -46,6 +46,10 @@ uint championMedalUpdateAttempts = 0;
 
 bool isWindowVisible = false;
 
+uint64 grindTimeStart = Time::Now;
+
+DnfHandler dnfHandler = DnfHandler();
+
 void Main() 
 {
 
@@ -81,6 +85,33 @@ void Main()
             if (lastGhostId != lastGhost.IdName) {
                 lastGhostId = lastGhost.IdName;
                 OnNewGhost(lastGhost);
+            }
+        }
+
+        auto race = MLFeed::GetRaceData_V4();
+        auto playerData = race.GetPlayer_V4(MLFeed::LocalPlayersName);
+        if (playerData !is null) {
+            // print(playerData.spawnIndex);
+            if (runs.current !is null) {
+                runs.current.hidden = false;
+                // if (playerData.spawnStatus == MLFeed::SpawnStatus::Spawned) {
+                //     runs.current.hidden = false;
+                // }
+                if (!playerData.IsFinished) {
+                    runs.current.time = playerData.CurrentRaceTime;
+                    runs.current.respawns = playerData.NbRespawnsRequested;
+                    @runs.current.beaten = GetHardestMedalBeaten(playerData.CurrentRaceTime);
+                    runs.current.grindTime = Time::Now - grindTimeStart;
+                }
+                runs.current.targetDelta = playerData.IsFinished ? 1 : 0;
+                runs.current.id = runs.NextRunID();
+            }
+
+            if (dnfHandler.isDNF(@playerData)) {
+                Run dnfRun = Run();
+                dnfRun.isDNF = true;
+                dnfRun.id = runs.NextRunID();
+                runs.AddRun(dnfRun);
             }
         }
 
@@ -440,9 +471,9 @@ void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost)
     }
 
     newRun.Update(currentTarget, thresholdsTable);
+    newRun.grindTime = Time::Now - grindTimeStart;
+    grindTimeStart = Time::Now;
     runs.AddRun(newRun);
-    
-    print("New run: " + newRun.ToString());
     UpdateCurrentTarget();
 }
 
@@ -480,10 +511,14 @@ void OnMapChange(CGameCtnChallenge@ map)
     UpdateCurrentTarget();
     
 #if DEPENDENCY_CHAMPIONMEDALS
-    UpdateCustomMedalTime(champion, function() { return ChampionMedals::GetCMTime(); });
+    startnew(function() {
+        UpdateCustomMedalTime(champion, function() { return ChampionMedals::GetCMTime(); });
+    });
 #endif
 #if DEPENDENCY_WARRIORMEDALS
-    UpdateCustomMedalTime(warrior, function() { return WarriorMedals::GetWMTimeAsync(); });
+    startnew(function() {
+        UpdateCustomMedalTime(warrior, function() { return WarriorMedals::GetWMTimeAsync(); });
+    });
 #endif
 }
 
@@ -503,6 +538,7 @@ void UpdateCustomMedalTime(Target @medal, MedalTimeCB @GetTime) {
             UpdateCurrentTarget();
         }
         sleep(1000 * attempts);
+        print(medal.coloredIcon() +" not detected attempt#" + attempts);
     }
 }
 

@@ -7,6 +7,9 @@ bool settingIsPBOnly = false;
 [Setting category="General" name="Default target medal" description="Target medal chosen on map load"]
 DefaultTargetMedalOptions settingDefaultTarget = DefaultTargetMedalOptions::closestNotBeaten;
 
+[Setting category="General" name="New Runs first" description="Show new runs at the top"]
+bool settingNewRunsFirst = false;
+
 
 [Setting category="Display" name="Window position"]
 vec2 settingWindowAnchor = vec2(0, 170);
@@ -20,8 +23,6 @@ bool settingWindowHide = false;
 bool settingUseSmallButtons = true;
 [Setting category="Display" name="Hide action buttons" description="Actions will stay accesible in Plugins tab in overlay"]
 bool settingUseHideButtons = false;
-[Setting category="Display" name="New Runs first" description="Show new runs at the top"]
-bool settingNewRunsFirst = false;
 
 
 [Setting category="Columns" name="Run number"]
@@ -38,6 +39,8 @@ bool settingColumnShowPBImprovment = false;
 bool settingColumnShowNoRespawnTime = true;
 [Setting category="Columns" name="Number of respawns"]
 bool settingColumnShowRespawns = true;
+[Setting category="Columns" name="Time since last finish or session start"]
+bool settingColumnShowGrindTime = true;
 
 [Setting hidden]
 string settingDeltasSerialized = DEFAULT_DELTAS;
