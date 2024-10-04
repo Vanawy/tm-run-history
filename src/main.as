@@ -42,13 +42,11 @@ bool inputTriggerPopup = false;
 
 bool autoChangeTarget = true;
 
-uint championMedalUpdateAttempts = 0;
+bool is_window_visible = false;
 
-bool isWindowVisible = false;
+uint64 grind_time_start = Time::Now;
 
-uint64 grindTimeStart = Time::Now;
-
-DnfHandler dnfHandler = DnfHandler();
+DnfHandler dnf_handler = DnfHandler();
 
 void Main() 
 {
@@ -93,21 +91,18 @@ void Main()
         if (playerData !is null) {
             // print(playerData.spawnIndex);
             if (runs.current !is null) {
-                runs.current.hidden = false;
-                // if (playerData.spawnStatus == MLFeed::SpawnStatus::Spawned) {
-                //     runs.current.hidden = false;
-                // }
+                runs.current.hidden = !setting_show_current_run;
                 if (!playerData.IsFinished) {
                     runs.current.time = playerData.CurrentRaceTime;
                     runs.current.respawns = playerData.NbRespawnsRequested;
                     @runs.current.beaten = GetHardestMedalBeaten(playerData.CurrentRaceTime);
-                    runs.current.grindTime = Time::Now - grindTimeStart;
+                    runs.current.grindTime = Time::Now - grind_time_start;
                 }
                 runs.current.targetDelta = playerData.IsFinished ? 1 : 0;
                 runs.current.id = runs.NextRunID();
             }
 
-            if (dnfHandler.isDNF(@playerData)) {
+            if (setting_show_dnf && dnf_handler.isDNF(@playerData)) {
                 Run dnfRun = Run();
                 dnfRun.isDNF = true;
                 dnfRun.id = runs.NextRunID();
@@ -116,11 +111,11 @@ void Main()
         }
 
         auto map = @trackmania.RootMap;
-        isWindowVisible = false;
+        is_window_visible = false;
         if (map !is null) {
-            isWindowVisible = map.MapInfo.MapUid != "";
+            is_window_visible = map.MapInfo.MapUid != "";
             if (trackmania.Editor !is null) {
-                isWindowVisible = false;
+                is_window_visible = false;
             }
             if (lastMapId != map.MapInfo.MapUid) {
                 lastMapId = map.MapInfo.MapUid;
@@ -144,7 +139,7 @@ void Render()
         return;
     }
     
-    if(isWindowVisible) {
+    if(is_window_visible) {
         if(settingWindowLockPosition) {
             UI::SetNextWindowPos(int(settingWindowAnchor.x), int(settingWindowAnchor.y), UI::Cond::Always);
         } else {
@@ -471,8 +466,8 @@ void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost)
     }
 
     newRun.Update(currentTarget, thresholdsTable);
-    newRun.grindTime = Time::Now - grindTimeStart;
-    grindTimeStart = Time::Now;
+    newRun.grindTime = Time::Now - grind_time_start;
+    grind_time_start = Time::Now;
     runs.AddRun(newRun);
     UpdateCurrentTarget();
 }
@@ -489,6 +484,8 @@ void OnMapChange(CGameCtnChallenge@ map)
     warrior.time = 0;
     custom.time = 0;
     pb.time = 0;
+
+    grind_time_start = Time::Now;
 
     auto trackmania = cast<CTrackMania@>(GetApp());
     auto network = trackmania.Network;

@@ -100,10 +100,9 @@ class HistoryTable
                 RenderRun(run);
             }
 
-            UI::TableNextRow();
-            RenderSeparator();
-            
             if (!current.hidden) {
+                UI::TableNextRow();
+                RenderSeparator();
                 UI::TableNextRow();
                 RenderRun(current);
             }
@@ -207,8 +206,10 @@ class HistoryTable
         }
         if (settingColumnShowGrindTime) {
             UI::TableNextColumn();
-            auto formatted = Time::Format(run.grindTime);
-            UI::Text(formatted.SubStr(0, formatted.Length - 1));
+            if (!run.isDNF) {
+                auto formatted = Time::Format(run.grindTime);
+                UI::Text(formatted.SubStr(0, formatted.Length - 1));
+            }
         }
     }
 

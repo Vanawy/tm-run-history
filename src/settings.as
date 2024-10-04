@@ -3,6 +3,8 @@ uint settingRunsLimit = 10;
 
 [Setting category="General" name="PBs only" description="Save only PB runs"]
 bool settingIsPBOnly = false;
+[Setting category="General" name="Show DNF" description="Save not finished runs"]
+bool setting_show_dnf = true;
 
 [Setting category="General" name="Default target medal" description="Target medal chosen on map load"]
 DefaultTargetMedalOptions settingDefaultTarget = DefaultTargetMedalOptions::closestNotBeaten;
@@ -24,6 +26,9 @@ bool settingUseSmallButtons = true;
 [Setting category="Display" name="Hide action buttons" description="Actions will stay accesible in Plugins tab in overlay"]
 bool settingUseHideButtons = false;
 
+[Setting category="Display" name="Show current run info" description="Added for development purposes"]
+bool setting_show_current_run = false;
+
 
 [Setting category="Columns" name="Run number"]
 bool settingColumnShowRunId = true;
@@ -38,9 +43,9 @@ bool settingColumnShowPBImprovment = false;
 [Setting category="Columns" name="No Respawn Time"]
 bool settingColumnShowNoRespawnTime = true;
 [Setting category="Columns" name="Number of respawns"]
-bool settingColumnShowRespawns = true;
+bool settingColumnShowRespawns = false;
 [Setting category="Columns" name="Time since last finish or session start"]
-bool settingColumnShowGrindTime = true;
+bool settingColumnShowGrindTime = false;
 
 [Setting hidden]
 string settingDeltasSerialized = DEFAULT_DELTAS;
