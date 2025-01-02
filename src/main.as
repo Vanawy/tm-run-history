@@ -13,6 +13,13 @@ enum DefaultTargetMedalOptions {
     bronze,
 }
 
+enum GameMode {
+    Race,
+    Platform,
+    Stunt,
+    Unknown,
+}
+
 
 Target@ currentTarget = null;
 Thresholds::Table thresholdsTable = Thresholds::Table();
@@ -48,11 +55,12 @@ uint64 grind_time_start = Time::Now;
 
 DnfHandler dnf_handler = DnfHandler();
 
+GameMode global_active_game_mode = GameMode::Unknown;
+
 void Main() 
 {
 
     string lastMapId = "";
-    string lastGhostId = "";
     CTrackMania@ trackmania = cast<CTrackMania>(GetApp());
     bool newRun = true;
 
@@ -135,6 +143,14 @@ void Render()
     }
 
     if (settingWindowHideWithOverlay && !UI::IsOverlayShown()) {
+        return;
+    }
+
+    if (global_active_game_mode == GameMode::Platform && !setting_show_in_platform) {
+        return;
+    }
+
+    if (global_active_game_mode == GameMode::Stunt && !setting_show_in_stunt) {
         return;
     }
     
@@ -481,6 +497,16 @@ void OnMapChange(CGameCtnChallenge@ map)
     pb.time = 0;
 
     grind_time_start = Time::Now;
+    
+    if (map.MapInfo.MapType == GAME_MODE_RACE) {
+        global_active_game_mode = GameMode::Race;
+    } else if (map.MapInfo.MapType == GAME_MODE_PLATFORM) {
+        global_active_game_mode = GameMode::Platform;
+    } else if (map.MapInfo.MapType == GAME_MODE_STUNT) {
+        global_active_game_mode = GameMode::Stunt;
+    } else {
+        global_active_game_mode = GameMode::Unknown;
+    }
 
     auto trackmania = cast<CTrackMania@>(GetApp());
     auto network = trackmania.Network;

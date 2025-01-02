@@ -60,14 +60,14 @@ class HistoryTable
         // uint numCols = 6;
 
         uint numCols = 
-            (settingColumnShowRunId ? 1 : 0)
-            + (settingColumnShowMedal ? 1 : 0)
-            + (settingColumnShowTime ? 1 : 0)
-            + (settingColumnShowDelta ? 1 : 0)
-            + (settingColumnShowPBImprovment ? 1 : 0)
-            + (settingColumnShowNoRespawnTime ? 1 : 0)
-            + (settingColumnShowRespawns ? 1 : 0)
-            + (settingColumnShowGrindTime ? 1 : 0)
+            (TableColumns::ShowRunId() ? 1 : 0)
+            + (TableColumns::ShowMedal() ? 1 : 0)
+            + (TableColumns::ShowTime() ? 1 : 0)
+            + (TableColumns::ShowDelta() ? 1 : 0)
+            + (TableColumns::ShowPBImprovment() ? 1 : 0)
+            + (TableColumns::ShowNoRespawnTime() ? 1 : 0)
+            + (TableColumns::ShowRespawns() ? 1 : 0)
+            + (TableColumns::ShowGrindTime() ? 1 : 0)
         ;
 
         if (numCols < 1) {
@@ -122,39 +122,39 @@ class HistoryTable
             icon = Icons::Spinner;
             formattedTime = "-:--.---";
         }
-        if (settingColumnShowRunId) {
+        if (TableColumns::ShowRunId()) {
             UI::TableNextColumn();
             UI::Text(icon);
         }
-        if (settingColumnShowMedal) {
+        if (TableColumns::ShowMedal()) {
             UI::TableNextColumn();
-            if (settingColumnShowRunId) {
+            if (TableColumns::ShowRunId()) {
                 UI::Text(ICON_MEDAL);
             } else {
                 UI::Text(icon);
             }
         }
-        if (settingColumnShowTime) {
+        if (TableColumns::ShowTime()) {
             UI::TableNextColumn();
             UI::Text(formattedTime);
         }
-        if (settingColumnShowDelta) {
+        if (TableColumns::ShowDelta()) {
             UI::TableNextColumn();
             UI::Text(Icons::Flag);
         }
-        if (settingColumnShowPBImprovment) {
+        if (TableColumns::ShowPBImprovment()) {
             UI::TableNextColumn();
             UI::Text(COLOR_PB + Icons::ChevronUp);
         }
-        if (settingColumnShowNoRespawnTime) {
+        if (TableColumns::ShowNoRespawnTime()) {
             UI::TableNextColumn();
             UI::Text(ICON_NORESPAWN);
         }
-        if (settingColumnShowRespawns) {
+        if (TableColumns::ShowRespawns()) {
             UI::TableNextColumn();
             UI::Text(ICON_RESPAWN);
         }
-        if (settingColumnShowGrindTime) {
+        if (TableColumns::ShowGrindTime()) {
             UI::TableNextColumn();
             UI::Text(ICON_GRIND_TIME);
         }
@@ -162,13 +162,13 @@ class HistoryTable
 
     void RenderRun(Run@ run)
     {
-        if (settingColumnShowRunId) {
+        if (TableColumns::ShowRunId()) {
             UI::TableNextColumn();
             if (run.id > 0) {
                 UI::Text("" + run.id);
             }
         }
-        if (settingColumnShowMedal) {
+        if (TableColumns::ShowMedal()) {
             UI::TableNextColumn();
             if (run.beaten !is null) {
                 UI::Text(run.beaten.coloredIcon());
@@ -176,7 +176,7 @@ class HistoryTable
                 UI::Text(COLOR_NO_MEDAL + ICON_NO_MEDAL);
             }
         }
-        if (settingColumnShowTime) {
+        if (TableColumns::ShowTime()) {
             UI::TableNextColumn();
             if (run.isDNF) {
                 UI::Text("DNF");
@@ -184,27 +184,27 @@ class HistoryTable
                 UI::Text("\\$fff" + Time::Format(run.time));
             }
         }
-        if (settingColumnShowDelta) {
+        if (TableColumns::ShowDelta()) {
             UI::TableNextColumn();
             run.DrawDelta();
         }
-        if (settingColumnShowPBImprovment) {
+        if (TableColumns::ShowPBImprovment()) {
             UI::TableNextColumn();
             run.DrawPBImprovment();
         }
-        if (settingColumnShowNoRespawnTime) {
+        if (TableColumns::ShowNoRespawnTime()) {
             UI::TableNextColumn();
             if (run.noRespawnTime > 0) {
                 UI::Text(run.noRespawn.color + Time::Format(run.noRespawnTime));
             }
         }
-        if (settingColumnShowRespawns) {
+        if (TableColumns::ShowRespawns()) {
             UI::TableNextColumn();
             if (run.respawns > 0) {
                 UI::Text("" + run.respawns);
             }
         }
-        if (settingColumnShowGrindTime) {
+        if (TableColumns::ShowGrindTime()) {
             UI::TableNextColumn();
             if (!run.isDNF) {
                 auto formatted = Time::Format(run.grindTime);

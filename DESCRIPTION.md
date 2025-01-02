@@ -12,7 +12,7 @@ Available data for each run:
 - PB improvment _(if PB was beaten by run)_
 - No respawn time _(if different from normal time)_
 
-### Contribuutors
+### Contributors
 [FortTM](https://github.com/Fort-TM)
 
 ### Feedback:

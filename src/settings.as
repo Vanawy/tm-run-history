@@ -13,14 +13,14 @@ DefaultTargetMedalOptions settingDefaultTarget = DefaultTargetMedalOptions::clos
 bool settingNewRunsFirst = false;
 
 
+[Setting category="Display" name="Hide window"]
+bool settingWindowHide = false;
+[Setting category="Display" name="Hide with overlay"]
+bool settingWindowHideWithOverlay = false;
 [Setting category="Display" name="Window position"]
 vec2 settingWindowAnchor = vec2(0, 170);
 [Setting category="Display" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
 bool settingWindowLockPosition = false;
-[Setting category="Display" name="Hide with overlay"]
-bool settingWindowHideWithOverlay = false;
-[Setting category="Display" name="Hide window"]
-bool settingWindowHide = false;
 [Setting category="Display" name="Small action buttons"]
 bool settingUseSmallButtons = true;
 [Setting category="Display" name="Hide action buttons" description="Actions will stay accesible in Plugins tab in overlay"]
@@ -49,6 +49,42 @@ bool settingColumnShowGrindTime = false;
 
 [Setting hidden]
 string settingDeltasSerialized = DEFAULT_DELTAS;
+[Setting hidden]
+bool setting_show_in_stunt = false;
+[Setting hidden]
+bool setting_show_in_platform = true;
+[Setting hidden]
+bool setting_show_respawns_in_platform = true;
+
+[SettingsTab name="Game Modes" icon="Gamepad"]
+void RenderGameModesTab()
+{
+    UI::BeginTabBar("GameModesTabBar");
+    if (UI::BeginTabItem("Platform")) {
+        setting_show_in_platform = UI::Checkbox("Show window", setting_show_in_platform);
+        WindowHiddenWarning();
+        setting_show_respawns_in_platform = UI::Checkbox("Force show Respawns column", setting_show_respawns_in_platform);
+        UI::EndTabItem();
+    }
+    if (UI::BeginTabItem("Stunt")) {
+        setting_show_in_stunt = UI::Checkbox("Show window", setting_show_in_stunt);
+        WindowHiddenWarning();
+        UI::EndTabItem();
+    }
+    if (UI::BeginTabItem("Race / Other")) {
+        UI::Text("All other modes uses settings from Display tab");
+        UI::EndTabItem();
+    }
+    UI::EndTabBar();
+}
+
+void WindowHiddenWarning() {
+    if (settingWindowHide) {
+        UI::PushStyleColor(UI::Col::Text, vec4(1, 0, 0, 1));
+        UI::Text("Window is hidden in Display tab. Setting above won't override it.");
+        UI::PopStyleColor();
+    }
+}
 
 
 [SettingsTab name="Feedback" icon="Bug"]
@@ -60,8 +96,8 @@ void RenderFeedbackTab()
     if (UI::Button("GitHub " + Icons::Github)) {
         OpenBrowserURL("https://github.com/Vanawy/tm-run-history/issues");
     }
-    if (UI::Button("Twitter " + Icons::Twitter)) {
-        OpenBrowserURL("https://twitter.com/vanawy");
+    if (UI::Button("Bluesky " + Icons::Plane)) {
+        OpenBrowserURL("https://bsky.app/profile/vanawy.dev");
     }
 }
 

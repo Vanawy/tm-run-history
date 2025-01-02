@@ -41,3 +41,9 @@ const string COLOR_NO_MEDAL = "\\$555";
 
 // other
 const uint MAX_CUSTOM_MEDAL_UPDATE_ATTEMPTS_PER_MAP = 3;
+
+// game modes
+const string GAME_MODE_NONE = "";
+const string GAME_MODE_RACE = "TrackMania\\TM_Race";
+const string GAME_MODE_PLATFORM = "TrackMania\\TM_Platform";
+const string GAME_MODE_STUNT = "TrackMania\\TM_Stunt";
