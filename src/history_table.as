@@ -75,8 +75,6 @@ class HistoryTable
         }
 
 
-        UI::BeginGroup();
-
         if(UI::BeginTable(TEXT_PLUGIN_NAME, numCols, UI::TableFlags::SizingFixedFit)) {
             
             // print(targets.Length);
@@ -108,7 +106,6 @@ class HistoryTable
             }
             UI::EndTable();
         }
-        UI::EndGroup();
     }
 
     void RenderHeader(Target@ target)
