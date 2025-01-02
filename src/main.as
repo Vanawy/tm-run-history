@@ -321,7 +321,7 @@ void RenderActions()
 
 void SetTarget(Target @target) 
 {
-    if (@currentTarget == @target) {
+    if (@currentTarget == @target && @currentTarget != @pb) {
         return;
     }
     @currentTarget = target;
