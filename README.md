@@ -10,3 +10,6 @@ Requires [MLHook](https://openplanet.dev/plugin/mlhook) and [MLFeed](https://ope
 Supports [Champion Medals](https://openplanet.dev/plugin/championmedals) and [Warrior Medals](https://github.com/ezio416/tm-warrior-medals/)
 
 ![This is an image](/assets/RunHistory.png)
+
+### Contributors
+[FortTM](https://github.com/Fort-TM) - fixed live servers issue and more

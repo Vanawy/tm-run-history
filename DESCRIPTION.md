@@ -12,7 +12,10 @@ Available data for each run:
 - PB improvment _(if PB was beaten by run)_
 - No respawn time _(if different from normal time)_
 
+### Contribuutors
+[FortTM](https://github.com/Fort-TM)
+
 ### Feedback:
-[Twitter](https://twitter.com/Vanawy)
+[Bluesky](https://bsky.app/profile/vanawy.dev)
 
 [Github](https://github.com/Vanawy/tm-run-history/)
