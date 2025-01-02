@@ -54,6 +54,7 @@ void Main()
     string lastMapId = "";
     string lastGhostId = "";
     CTrackMania@ trackmania = cast<CTrackMania>(GetApp());
+    bool newRun = true;
 
     // init delta thresholds table
     thresholdsTable.FromString(settingDeltasSerialized);
@@ -77,15 +78,6 @@ void Main()
     while(true) {
         yield();
 
-        auto gd = MLFeed::GetGhostData();
-        if (gd !is null && gd.Ghosts_V2 !is null && gd.NbGhosts != 0) {
-            auto lastGhost = @gd.Ghosts_V2[gd.NbGhosts - 1];
-            if (lastGhostId != lastGhost.IdName) {
-                lastGhostId = lastGhost.IdName;
-                OnNewGhost(lastGhost);
-            }
-        }
-
         auto race = MLFeed::GetRaceData_V4();
         auto playerData = race.GetPlayer_V4(MLFeed::LocalPlayersName);
         if (playerData !is null) {
@@ -100,6 +92,13 @@ void Main()
                 }
                 runs.current.targetDelta = playerData.IsFinished ? 1 : 0;
                 runs.current.id = runs.NextRunID();
+            }
+
+            if (newRun && playerData.IsFinished && playerData.LastCpTime > 0) {
+                newRun = false;
+                OnFinishedRun(playerData.LastCpTime);
+            } else if (!playerData.IsFinished) {
+                newRun = true;
             }
 
             if (setting_show_dnf && dnf_handler.isDNF(@playerData)) {
@@ -424,15 +423,11 @@ Target@ GetHardestMedalBeaten(int time)
     return newTarget;
 }
 
-void OnNewGhost(const MLFeed::GhostInfo_V2@ ghost) 
+void OnFinishedRun(const int lastTime) 
 {
-    if (!ghost.IsLocalPlayer || ghost.IsPersonalBest) {
-        return;
-    }
-    int lastTime = ghost.Result_Time;
+    if (lastTime <= 0) return;
+
     auto beaten = GetHardestMedalBeaten(lastTime);
-
-
 
     auto newRun = Run(runs.NextRunID(), lastTime, beaten);
 
