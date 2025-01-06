@@ -359,12 +359,13 @@ void UpdateCurrentTarget()
         return;
     }
 
-    Target @newTarget = @bronze;
+    Target@ newTarget = @bronze;
     int smallestDelta = bronze.time;
-    Target @defaultTarget = @bronze;
+    Target@ defaultTarget = @bronze;
     
     if (settingDefaultTarget != DefaultTargetMedalOptions::closestNotBeaten) {
-        defaultTarget = GetDefaultTarget();
+        @defaultTarget = GetDefaultTarget();
+        @newTarget = @defaultTarget;
     }
 
     for (uint i = 0; i < targets.Length; i++) {

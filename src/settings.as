@@ -6,7 +6,7 @@ bool settingIsPBOnly = false;
 [Setting category="General" name="Show DNF" description="Save not finished runs"]
 bool setting_show_dnf = true;
 
-[Setting category="General" name="Default target medal" description="Target medal chosen on map load"]
+[Setting category="General" name="Default target medal" description="Selects the baseline medal for target comparison on map load. If default target is beaten plugin will use next closest target (same as closestNotBeaten option)."]
 DefaultTargetMedalOptions settingDefaultTarget = DefaultTargetMedalOptions::closestNotBeaten;
 
 [Setting category="General" name="New Runs first" description="Show new runs at the top"]
