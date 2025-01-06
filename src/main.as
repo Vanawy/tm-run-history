@@ -79,7 +79,7 @@ void Main()
         yield();
 
         auto race = MLFeed::GetRaceData_V4();
-        auto playerData = race.GetPlayer_V4(MLFeed::LocalPlayersName);
+        auto playerData = race.LocalPlayer;
         if (playerData !is null) {
             // print(playerData.spawnIndex);
             if (runs.current !is null) {
@@ -433,7 +433,7 @@ void OnFinishedRun(const int lastTime)
 
     
     auto raceData = MLFeed::GetRaceData_V4();
-    auto playerData = raceData.GetPlayer_V4(MLFeed::LocalPlayersName);
+    auto playerData = raceData.LocalPlayer;
     if (playerData !is null) {
         auto noRespawnTime = playerData.LastTheoreticalCpTime;
         auto norespawnTarget = GetHardestMedalBeaten(noRespawnTime);
