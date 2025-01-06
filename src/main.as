@@ -120,6 +120,8 @@ void Main()
                 lastMapId = map.MapInfo.MapUid;
                 OnMapChange(map);
             }
+        } else if (dnf_handler.IsRunning()) {
+             dnf_handler.Reset();
         }
     }
 }

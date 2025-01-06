@@ -30,4 +30,14 @@ class DnfHandler {
 
         return false;
     }
+
+    void Reset() {
+        last_spawn_status = MLFeed::SpawnStatus::Spawning;
+        is_running = false;
+        last_finish_state = false;
+    }
+
+    bool IsRunning() {
+        return is_running;
+    }
 }
