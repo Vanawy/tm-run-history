@@ -1,5 +1,5 @@
 class DnfHandler {
-    protected uint last_start_time = 0;
+    protected MLFeed::SpawnStatus last_spawn_status = MLFeed::SpawnStatus::Spawning;
     protected bool is_running = false;
     protected bool last_finish_state = false;
 
@@ -8,15 +8,36 @@ class DnfHandler {
         if (cpInfo is null) {
             return false;
         }
-        if (is_running && cpInfo.StartTime > last_start_time) {
-            last_start_time = cpInfo.StartTime;
-            if (!last_finish_state) {
+
+        if (!is_running && UI::CurrentActionMap() != "SpectatorMap" && cpInfo.CurrentRaceTime < 0 && cpInfo.SpawnStatus == MLFeed::SpawnStatus::Spawning) {
+            is_running = true;
+            return false;
+        }
+
+        if (is_running && cpInfo.SpawnStatus != last_spawn_status) {
+            last_spawn_status = cpInfo.SpawnStatus;
+
+            if (!last_finish_state && cpInfo.SpawnStatus == MLFeed::SpawnStatus::Spawning) {
                 return true;
             }
         }
-        is_running = true;
-        last_start_time = cpInfo.StartTime;
-        last_finish_state = cpInfo.IsFinished;
+
+        if (cpInfo.IsFinished) {
+            last_finish_state = true;
+        } else if (cpInfo.SpawnStatus == MLFeed::SpawnStatus::Spawned) {
+            last_finish_state = false;
+        }
+
         return false;
+    }
+
+    void Reset() {
+        last_spawn_status = MLFeed::SpawnStatus::Spawning;
+        is_running = false;
+        last_finish_state = false;
+    }
+
+    bool IsRunning() {
+        return is_running;
     }
 }
