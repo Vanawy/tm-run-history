@@ -136,52 +136,43 @@ void Main()
 
 void Render() 
 {    
-    if(!UI::IsGameUIVisible()) {
+    if (!is_window_visible) {
         return;
     }
-
-    if (settingWindowHide) {
-        return;
-    }
-
-    if (settingWindowHideWithOverlay && !UI::IsOverlayShown()) {
-        return;
-    }
-
     if (global_active_game_mode == GameMode::Platform && !setting_show_in_platform) {
         return;
     }
-
     if (global_active_game_mode == GameMode::Stunt && !setting_show_in_stunt) {
         return;
     }
-    
-    if(is_window_visible) {
-        if(settingWindowLockPosition) {
-            UI::SetNextWindowPos(int(settingWindowAnchor.x), int(settingWindowAnchor.y), UI::Cond::Always);
-        } else {
-            UI::SetNextWindowPos(int(settingWindowAnchor.x), int(settingWindowAnchor.y), UI::Cond::FirstUseEver);
-        }
-        
-        int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
-        if (!UI::IsOverlayShown()) {
-            windowFlags |= UI::WindowFlags::NoInputs;
-        }
 
-        UI::Begin("Run History", windowFlags);
-        
-        if(!settingWindowLockPosition) {
-            settingWindowAnchor = UI::GetWindowPos();
-        }
-        
-        runs.Render(currentTarget);
-
-        RenderActions();
-        
-        UI::End();
-    }
+    RenderMainWindow();
 }
 
+void RenderMainWindow()
+{   
+    if(!Windows::ShowMainWindow()) {
+        return;
+    }
+    
+    if(settingWindowLockPosition) {
+        UI::SetNextWindowPos(int(settingWindowAnchor.x), int(settingWindowAnchor.y), UI::Cond::Always);
+    } else {
+        UI::SetNextWindowPos(int(settingWindowAnchor.x), int(settingWindowAnchor.y), UI::Cond::FirstUseEver);
+    }
+
+    UI::Begin(Windows::MAIN, Windows::Flags(true));
+    
+    if(!settingWindowLockPosition) {
+        settingWindowAnchor = UI::GetWindowPos();
+    }
+    
+    runs.Render(currentTarget);
+
+    RenderActions();
+    
+    UI::End();
+}
 
 void RenderChangeTargetPopup()
 {
@@ -245,12 +236,12 @@ void RenderAddTargetPopup()
 void RenderMenu() {
 
     if (UI::BeginMenu(ICON_MENU + " " + TEXT_PLUGIN_NAME)) {
-        string toggleVisibilityText = settingWindowHide 
-            ? Icons::Eye + " Show window"
-            : Icons::EyeSlash + " Hide window";
-        if (UI::MenuItem(toggleVisibilityText)) {
-            settingWindowHide = !settingWindowHide;
-        }
+        // string toggleVisibilityText = settingWindowHide 
+        //     ? Icons::Eye + " Show window"
+        //     : Icons::EyeSlash + " Hide window";
+        // if (UI::MenuItem(toggleVisibilityText)) {
+        //     settingWindowHide = !settingWindowHide;
+        // }
 
         if (UI::BeginMenu(ICON_CLEAR + " " + TEXT_CLEAR)) {
             if (UI::MenuItem("Clear.")) {

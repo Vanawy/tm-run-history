@@ -13,10 +13,12 @@ DefaultTargetMedalOptions settingDefaultTarget = DefaultTargetMedalOptions::clos
 bool settingNewRunsFirst = false;
 
 
-[Setting category="Main window" name="Hide window"]
+[Setting hidden]
 bool settingWindowHide = false;
-[Setting category="Main window" name="Hide with overlay"]
+[Setting hidden]
 bool settingWindowHideWithOverlay = false;
+[Setting category="Main window" name="Show"]
+Windows::ShowIf setting_main_show_window = Windows::ShowIf::InterfaceShown;
 [Setting category="Main window" name="Window position"]
 vec2 settingWindowAnchor = vec2(0, 170);
 [Setting category="Main window" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
