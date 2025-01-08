@@ -13,20 +13,20 @@ DefaultTargetMedalOptions settingDefaultTarget = DefaultTargetMedalOptions::clos
 bool settingNewRunsFirst = false;
 
 
-[Setting category="Display" name="Hide window"]
+[Setting category="Main window" name="Hide window"]
 bool settingWindowHide = false;
-[Setting category="Display" name="Hide with overlay"]
+[Setting category="Main window" name="Hide with overlay"]
 bool settingWindowHideWithOverlay = false;
-[Setting category="Display" name="Window position"]
+[Setting category="Main window" name="Window position"]
 vec2 settingWindowAnchor = vec2(0, 170);
-[Setting category="Display" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
+[Setting category="Main window" name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
 bool settingWindowLockPosition = false;
-[Setting category="Display" name="Small action buttons"]
+[Setting category="Main window" name="Small action buttons"]
 bool settingUseSmallButtons = true;
-[Setting category="Display" name="Hide action buttons" description="Actions will stay accesible in Plugins tab in overlay"]
+[Setting category="Main window" name="Hide action buttons" description="Actions will stay accesible in Plugins tab in overlay"]
 bool settingUseHideButtons = false;
 
-[Setting category="Display" name="Show current run info" description="Added for development purposes"]
+[Setting category="Main window" name="Show current run info" description="Added for development purposes"]
 bool setting_show_current_run = false;
 
 
@@ -72,7 +72,7 @@ void RenderGameModesTab()
         UI::EndTabItem();
     }
     if (UI::BeginTabItem("Race / Other")) {
-        UI::Text("All other modes uses settings from Display tab");
+        UI::Text("All other modes uses settings from Main window tab");
         UI::EndTabItem();
     }
     UI::EndTabBar();
@@ -81,7 +81,7 @@ void RenderGameModesTab()
 void WindowHiddenWarning() {
     if (settingWindowHide) {
         UI::PushStyleColor(UI::Col::Text, vec4(1, 0, 0, 1));
-        UI::Text("Window is hidden in Display tab. Setting above won't override it.");
+        UI::Text("Window is hidden in Main window tab. Setting above won't override it.");
         UI::PopStyleColor();
     }
 }
