@@ -23,7 +23,7 @@ namespace Thresholds {
 
         private array<int> deltas = {};
 
-        private int newTime = 0;
+        private float newTime = 0.0;
 
         bool isChanged = false;
 
@@ -111,16 +111,23 @@ namespace Thresholds {
                 
                 UI::TableNextColumn();
                 UI::TableNextColumn();
-                this.newTime = UI::InputInt("ms", this.newTime, 100);
+                this.newTime = UI::InputFloat("seconds", this.newTime, 0.005);
+                auto newTimeMs = int(Math::Round(this.newTime * 1000.0, 0));
 
                 UI::TableNextColumn();
                 UI::TableNextColumn();
                 if (UI::Button(Icons::Plus)) {
                     if (this.newTime > 0 && this.deltas.Length < LIMIT) {
-                        this.Add(this.newTime);
+                        this.Add(newTimeMs);
                         this.newTime = 0;
                         this.isChanged = true;
                     }
+                }
+                if (newTimeMs > 0) {
+                    UI::TableNextRow();
+                    UI::TableNextColumn();
+                    UI::TableNextColumn();
+                    UI::Text("New time " + Time::Format(newTimeMs));
                 }
                 if (disabled) {
                     UI::EndDisabled();
