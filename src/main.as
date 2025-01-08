@@ -435,7 +435,7 @@ Target@ GetHardestMedalBeaten(int time)
             continue;
         }
         auto delta = time - medals[i].time;
-        if (delta < 0) {
+        if (delta <= 0) {
             @newTarget = @medals[i];
         }
     }
