@@ -1,6 +1,7 @@
 namespace Windows {
 
     const string MAIN = "Main";
+    const string MEDALS = "Medals";
 
     enum ShowIf {
         Always,
@@ -12,6 +13,10 @@ namespace Windows {
 
     bool ShowMainWindow() {
         return _CheckOption(setting_main_show_window);
+    }
+
+    bool ShowMedalsWindow() {
+        return _CheckOption(setting_medals_show_window);
     }
 
     int Flags(bool with_inputs = false) {

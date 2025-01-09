@@ -31,6 +31,11 @@ bool settingUseHideButtons = false;
 [Setting category="Main window" name="Show current run info" description="Added for development purposes"]
 bool setting_show_current_run = false;
 
+[Setting category="Medal window" name="Show"]
+Windows::ShowIf setting_medals_show_window = Windows::ShowIf::InterfaceShown;
+[Setting category="Medal window" name="Background color" color]
+vec4 setting_medals_background_color = vec4(0.1, 0.1, 0.1, 0.8);
+
 
 [Setting category="Columns" name="Run number"]
 bool settingColumnShowRunId = true;

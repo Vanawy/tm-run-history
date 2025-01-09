@@ -147,6 +147,7 @@ void Render()
     }
 
     RenderMainWindow();
+    RenderMedalsWindow();
 }
 
 void RenderMainWindow()
@@ -161,17 +162,62 @@ void RenderMainWindow()
         UI::SetNextWindowPos(int(settingWindowAnchor.x), int(settingWindowAnchor.y), UI::Cond::FirstUseEver);
     }
 
-    UI::Begin(Windows::MAIN, Windows::Flags(true));
-    
-    if(!settingWindowLockPosition) {
-        settingWindowAnchor = UI::GetWindowPos();
+    if (UI::Begin(Windows::MAIN, Windows::Flags(true))) {
+        if(!settingWindowLockPosition) {
+            settingWindowAnchor = UI::GetWindowPos();
+        }
+        
+        runs.Render(currentTarget);
+
+        RenderActions();
+        
+        UI::End();
     }
     
-    runs.Render(currentTarget);
+}
 
-    RenderActions();
+void RenderMedalsWindow()
+{
+    if(!Windows::ShowMedalsWindow()) {
+        return;
+    }
     
-    UI::End();
+    string medals = "";
+    uint count_medals = 0;
+    for (int n = 0; n < runs.runs.Length; n++) {
+        Run@ run = @runs.runs[n];
+        if (run.hidden) {
+            continue;
+        }
+        
+        string icon = "";
+        if (run.isDNF) {
+            icon = COLOR_NO_MEDAL + ICON_DNF;
+        } else {
+            icon = run.beaten.coloredIcon();
+        }
+        if (settingNewRunsFirst) {
+            medals = icon + medals;
+        } else {
+            medals += icon;
+        }
+        count_medals++;
+    }
+    medals += COLOR_NO_MEDAL;
+    for (uint i = 0; i < settingRunsLimit - count_medals; i++) {
+        medals += Icons::SunO;
+    }
+
+    bool is_movable = UI::IsOverlayShown();
+    UI::PushStyleColor(UI::Col::WindowBg, setting_medals_background_color);
+    UI::PushStyleVar(UI::StyleVar::WindowPadding, vec2(0, 0));
+    if (UI::Begin(Windows::MEDALS, Windows::Flags(is_movable))) {
+        UI::AlignTextToFramePadding();
+        UI::Text(medals);
+        UI::End();
+    }
+    UI::PopStyleVar();
+    UI::PopStyleColor();
 }
 
 void RenderChangeTargetPopup()
