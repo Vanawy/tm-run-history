@@ -489,6 +489,7 @@ void OnFinishedRun(const int lastTime)
 
 void OnMapChange(CGameCtnChallenge@ map) 
 {
+    print("Map changed to " + map.MapInfo.MapUid);
     runs.Clear();
 
     author.time = map.TMObjective_AuthorTime;
@@ -552,14 +553,16 @@ void UpdateCustomMedalTime(Target @medal, MedalTimeCB @GetTime) {
         && attempts < MAX_CUSTOM_MEDAL_UPDATE_ATTEMPTS_PER_MAP
     ) {
         attempts += 1;
+        sleep(1000 * attempts);
 
         int newTime = GetTime();
         if (medal.time != int(newTime)) {
             medal.time = newTime;
             print(medal.coloredIcon() + Time::Format(medal.time) + " attempt#" + attempts);
             UpdateCurrentTarget();
+            return;
         }
-        sleep(1000 * attempts);
+
         print(medal.coloredIcon() +" not detected attempt#" + attempts);
     }
 }
