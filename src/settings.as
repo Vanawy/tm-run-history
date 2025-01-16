@@ -11,6 +11,8 @@ DefaultTargetMedalOptions settingDefaultTarget = DefaultTargetMedalOptions::clos
 
 [Setting category="General" name="New Runs first" description="Show new runs at the top"]
 bool settingNewRunsFirst = false;
+[Setting category="General" name="Add PB record on map change" description="Adds PB run to history on map change"]
+bool setting_add_pb_on_map_change = true;
 
 
 [Setting category="Display" name="Hide window"]

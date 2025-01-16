@@ -529,6 +529,11 @@ void OnMapChange(CGameCtnChallenge@ map)
         if (newPbTime != 0) {
             pb.time = newPbTime;
             print(pb.coloredIcon() + Time::Format(pb.time));
+            if (setting_add_pb_on_map_change && pb.hasTime()) {
+                auto run = Run(runs.NextRunID(), pb.time, GetHardestMedalBeaten(pb.time));
+                run.isPB = true;
+                runs.AddRun(run);
+            }
         }
     }
     UpdateCurrentTarget();
