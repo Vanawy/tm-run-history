@@ -513,30 +513,9 @@ void OnMapChange(CGameCtnChallenge@ map)
         global_active_game_mode = GameMode::Unknown;
     }
 
-    auto trackmania = cast<CTrackMania@>(GetApp());
-    auto network = trackmania.Network;
-    if(network.ClientManiaAppPlayground !is null) {
-        auto userMgr = network.ClientManiaAppPlayground.UserMgr;
-        MwId userId;
-        if (userMgr.Users.Length > 0) {
-            userId = userMgr.Users[0].Id;
-        } else {
-            userId.Value = uint(-1);
-        }
-        
-        auto scoreMgr = network.ClientManiaAppPlayground.ScoreMgr;
-        uint newPbTime = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
-        if (newPbTime != 0) {
-            pb.time = newPbTime;
-            print(pb.coloredIcon() + Time::Format(pb.time));
-            if (setting_add_pb_on_map_change && pb.hasTime()) {
-                auto run = Run(runs.NextRunID(), pb.time, GetHardestMedalBeaten(pb.time));
-                run.isPB = true;
-                runs.AddRun(run);
-            }
-        }
-    }
-    UpdateCurrentTarget();
+    startnew(function() {
+        UpdateCustomMedalTime(pb, function() { return GetPBTime(); });
+    });
     
 #if DEPENDENCY_CHAMPIONMEDALS
     startnew(function() {
@@ -550,6 +529,31 @@ void OnMapChange(CGameCtnChallenge@ map)
 #endif
 }
 
+int GetPBTime() {
+    
+    auto trackmania = cast<CTrackMania@>(GetApp());
+    auto map = trackmania.RootMap;
+    auto network = trackmania.Network;
+    if (network.ClientManiaAppPlayground is null) {
+        return 0;
+    }
+    
+    auto userMgr = network.ClientManiaAppPlayground.UserMgr;
+    MwId userId;
+    if (userMgr.Users.Length > 0) {
+        userId = userMgr.Users[0].Id;
+    } else {
+        userId.Value = uint(-1);
+    }
+    
+    auto scoreMgr = network.ClientManiaAppPlayground.ScoreMgr;
+    uint newPbTime = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
+    if (newPbTime < 0) {
+        return 0;
+    }
+    return newPbTime;
+}
+
 funcdef int MedalTimeCB();
 
 void UpdateCustomMedalTime(Target @medal, MedalTimeCB @GetTime) {
@@ -558,12 +562,15 @@ void UpdateCustomMedalTime(Target @medal, MedalTimeCB @GetTime) {
         && attempts < MAX_CUSTOM_MEDAL_UPDATE_ATTEMPTS_PER_MAP
     ) {
         attempts += 1;
-        sleep(1000 * attempts);
+        sleep(500 * attempts);
 
         int newTime = GetTime();
-        if (medal.time != int(newTime)) {
+        if (newTime > 0 && medal.time != newTime) {
             medal.time = newTime;
             print(medal.coloredIcon() + Time::Format(medal.time) + " attempt#" + attempts);
+            if (@medal == @pb) {
+                OnMapPBFound();
+            }
             UpdateCurrentTarget();
             return;
         }
@@ -581,4 +588,19 @@ void OnThresholdsTableChange()
 void OnClearHistory() 
 {
     runs.Clear();
+}
+
+void OnMapPBFound() 
+{
+    if (!pb.hasTime()) {
+        warn("Invalid PB: " + pb.time);
+        return;
+    }
+    print("PB found " + pb.coloredIcon() + Time::Format(pb.time));
+
+    if (setting_add_pb_on_map_change && pb.hasTime()) {
+        auto run = Run(runs.NextRunID(), pb.time, GetHardestMedalBeaten(pb.time));
+        run.isPB = true;
+        runs.AddRun(run);
+    }
 }

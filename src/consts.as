@@ -40,7 +40,7 @@ const string COLOR_WARRIOR  = "\\$3cf";
 const string COLOR_NO_MEDAL = "\\$555";
 
 // other
-const uint MAX_CUSTOM_MEDAL_UPDATE_ATTEMPTS_PER_MAP = 3;
+const uint MAX_CUSTOM_MEDAL_UPDATE_ATTEMPTS_PER_MAP = 5;
 
 // game modes
 const string GAME_MODE_NONE = "";
