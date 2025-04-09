@@ -2,7 +2,7 @@
 name        = "Run History"
 author      = "Vanawy"
 category    = "Overlay"
-version     = "0.9.1"
+version     = "0.9.2"
 
 [script]
 dependencies = ["MLHook", "MLFeedRaceData"]

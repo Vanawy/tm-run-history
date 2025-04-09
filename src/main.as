@@ -356,6 +356,10 @@ void UpdateCurrentTarget()
     }
 
     if (settingDefaultTarget == DefaultTargetMedalOptions::pb) {
+        if (!pb.hasTime()) {
+            SetTarget(gold);
+            return;
+        }
         SetTarget(pb);
         return;
     }
@@ -527,6 +531,7 @@ void OnMapChange(CGameCtnChallenge@ map)
         UpdateCustomMedalTime(warrior, function() { return WarriorMedals::GetWMTimeAsync(); });
     });
 #endif
+    UpdateCurrentTarget();
 }
 
 int GetPBTime() {
