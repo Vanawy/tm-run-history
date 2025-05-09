@@ -174,7 +174,7 @@ void Render()
             settingWindowAnchor = UI::GetWindowPos();
         }
         
-        runs.Render(currentTarget);
+        runs.Render(currentTarget, pb);
 
         RenderActions();
         

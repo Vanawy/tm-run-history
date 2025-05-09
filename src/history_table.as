@@ -55,7 +55,7 @@ class HistoryTable
         return runs.IsEmpty();
     }
 
-    void Render(Target @target) 
+    void Render(Target @target, Target@ pb) 
     {
         // uint numCols = 6;
 
@@ -95,7 +95,7 @@ class HistoryTable
                 }
 
                 UI::TableNextRow();
-                RenderRun(run);
+                RenderRun(run, pb);
             }
 
             if (!current.hidden) {
@@ -157,7 +157,7 @@ class HistoryTable
         }
     }
 
-    void RenderRun(Run@ run)
+    void RenderRun(Run@ run, Target@ pb = null)
     {
         if (TableColumns::ShowRunId()) {
             UI::TableNextColumn();
@@ -187,7 +187,7 @@ class HistoryTable
         }
         if (TableColumns::ShowPBImprovment()) {
             UI::TableNextColumn();
-            run.DrawPBImprovment();
+            run.DrawPBImprovment(pb);
         }
         if (TableColumns::ShowNoRespawnTime()) {
             UI::TableNextColumn();

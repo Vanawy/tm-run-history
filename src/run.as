@@ -43,7 +43,7 @@ class Run
         UI::Text(style + FormatDelta(targetDelta));
     }
     
-    void DrawPBImprovment() 
+    void DrawPBImprovment(Target@ pb = null) 
     {
         if (!isPB) {
             return;
@@ -51,6 +51,8 @@ class Run
         string text = COLOR_PB + "PB " + ICON_PB_STAR;
         if (pbDelta < 0) {
             text = COLOR_PB + "-" + Time::Format(-pbDelta, true, false);
+        } else if (setting_show_pb_delta_first_run && pb != null) {
+            text = COLOR_PB + "+" + Time::Format(time - pb.time, true, false);
         }
         UI::Text(text);
     }

@@ -13,6 +13,8 @@ DefaultTargetMedalOptions settingDefaultTarget = DefaultTargetMedalOptions::clos
 bool settingNewRunsFirst = false;
 [Setting category="General" name="Add PB record on map change" description="Adds PB run to history on map change"]
 bool setting_add_pb_on_map_change = true;
+[Setting category="General" name="Show PB delta for first run" description="Shows PB delta for first run on the map. If disabled it will show 0.00"]
+bool setting_show_pb_delta_first_run = false;
 
 
 [Setting category="Display" name="Hide window"]
