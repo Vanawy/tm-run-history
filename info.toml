@@ -1,9 +1,9 @@
 [meta]
-name        = "Run History"
-author      = "Vanawy"
-category    = "Overlay"
-version     = "0.9.2"
+name = "Run History"
+author = "Vanawy"
+category = "Overlay"
+version = "0.10.0"
 
 [script]
-dependencies = ["MLHook", "MLFeedRaceData"]
+dependencies = ["NadeoServices", "MLHook", "MLFeedRaceData"]
 optional_dependencies = ["ChampionMedals", "WarriorMedals"]

@@ -13,6 +13,8 @@ DefaultTargetMedalOptions settingDefaultTarget = DefaultTargetMedalOptions::clos
 bool settingNewRunsFirst = false;
 [Setting category="General" name="Add PB record on map change" description="Adds PB run to history on map change"]
 bool setting_add_pb_on_map_change = true;
+[Setting category="General" name="Add WR as custom medal" description="Adds world record time as addditional target (refreshses on map change)"]
+bool setting_add_wr_as_target = true;
 
 
 [Setting category="Display" name="Hide window"]

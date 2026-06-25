@@ -1,5 +1,6 @@
 enum DefaultTargetMedalOptions {
     closestNotBeaten,
+    wr,
     pb,
 #if DEPENDENCY_CHAMPIONMEDALS
     champion,
@@ -33,10 +34,12 @@ Target@ gold        = Target(COLOR_GOLD, ICON_MEDAL);
 Target@ author      = Target(COLOR_AUTHOR, ICON_MEDAL);
 Target@ champion    = Target(COLOR_CHAMPION, ICON_MEDAL);
 Target@ warrior     = Target(COLOR_WARRIOR, ICON_MEDAL);
+Target@ wr          = Target(COLOR_WR, ICON_TROPHY);
 Target@ no_medal    = Target(COLOR_NO_MEDAL, ICON_NO_MEDAL);
 
 array<Target@> targets = {
     pb,
+    wr,
     custom,
     author,
     gold,
@@ -46,24 +49,26 @@ array<Target@> targets = {
 
 float inputNewTime = 0;
 bool inputTriggerPopup = false;
-
 bool autoChangeTarget = true;
-
 bool is_window_visible = false;
-
+string activeMapId = "";
+bool wasRunFinishedLastFrame = false;
 uint64 grind_time_start = Time::Now;
-
 DnfHandler dnf_handler = DnfHandler();
-
 GameMode global_active_game_mode = GameMode::Unknown;
 
 void Main() 
 {
+    Init();
+    while(true) {
+        yield();
+        Update();
+    }
+}
 
-    string lastMapId = "";
-    CTrackMania@ trackmania = cast<CTrackMania>(GetApp());
-    bool newRun = true;
-
+void Init()
+{
+    print("Init " + TEXT_PLUGIN_NAME);
     // init delta thresholds table
     thresholdsTable.FromString(settingDeltasSerialized);
 
@@ -81,56 +86,57 @@ void Main()
 #else
     warn("ChampionMedals not installed");
 #endif
+    NadeoServices::AddAudience("NadeoLiveServices");
+}
 
+void Update()
+{
+    CTrackMania@ trackmania = cast<CTrackMania>(GetApp());
 
-    while(true) {
-        yield();
-
-        auto race = MLFeed::GetRaceData_V4();
+    // print("Update() called");
+    auto race = MLFeed::GetRaceData_V4();
+    if (race !is null && race.LocalPlayer !is null) {
         auto playerData = race.LocalPlayer;
-        if (playerData !is null) {
-            // print(playerData.spawnIndex);
-            if (runs.current !is null) {
-                runs.current.hidden = !setting_show_current_run;
-                if (!playerData.IsFinished) {
-                    runs.current.time = playerData.CurrentRaceTime;
-                    runs.current.respawns = playerData.NbRespawnsRequested;
-                    @runs.current.beaten = GetHardestMedalBeaten(playerData.CurrentRaceTime);
-                    runs.current.grindTime = Time::Now - grind_time_start;
-                }
-                runs.current.targetDelta = playerData.IsFinished ? 1 : 0;
-                runs.current.id = runs.NextRunID();
+        // print(playerData.spawnIndex);
+        if (runs.current !is null) {
+            runs.current.hidden = !setting_show_current_run;
+            if (!playerData.IsFinished) {
+                runs.current.time = playerData.CurrentRaceTime;
+                runs.current.respawns = playerData.NbRespawnsRequested;
+                @runs.current.beaten = GetHardestMedalBeaten(playerData.CurrentRaceTime);
+                runs.current.grindTime = Time::Now - grind_time_start;
             }
-
-            if (newRun && playerData.IsFinished && playerData.LastCpTime > 0) {
-                newRun = false;
-                OnFinishedRun(playerData.LastCpTime);
-            } else if (!playerData.IsFinished) {
-                newRun = true;
-            }
-
-            if (setting_show_dnf && dnf_handler.isDNF(@playerData)) {
-                Run dnfRun = Run();
-                dnfRun.isDNF = true;
-                dnfRun.id = runs.NextRunID();
-                runs.AddRun(dnfRun);
-            }
+            runs.current.targetDelta = playerData.IsFinished ? 1 : 0;
+            runs.current.id = runs.NextRunID();
         }
 
-        auto map = @trackmania.RootMap;
-        is_window_visible = false;
-        if (map !is null) {
-            is_window_visible = map.MapInfo.MapUid != "";
-            if (trackmania.Editor !is null) {
-                is_window_visible = false;
-            }
-            if (lastMapId != map.MapInfo.MapUid) {
-                lastMapId = map.MapInfo.MapUid;
-                OnMapChange(map);
-            }
-        } else if (dnf_handler.IsRunning()) {
-             dnf_handler.Reset();
+        if (!wasRunFinishedLastFrame && playerData.IsFinished && playerData.LastCpTime > 0) {
+            OnFinishedRun(playerData.LastCpTime);
         }
+
+        if (setting_show_dnf && dnf_handler.isDNF(@playerData)) {
+            Run dnfRun = Run();
+            dnfRun.isDNF = true;
+            dnfRun.id = runs.NextRunID();
+            runs.AddRun(dnfRun);
+        }
+
+        wasRunFinishedLastFrame = playerData.IsFinished;
+    }
+
+    auto map = @trackmania.RootMap;
+    is_window_visible = false;
+    if (map !is null) {
+        is_window_visible = map.MapInfo.MapUid != "";
+        if (trackmania.Editor !is null) {
+            is_window_visible = false;
+        }
+        if (activeMapId != map.MapInfo.MapUid) {
+            activeMapId = map.MapInfo.MapUid;
+            OnMapChange(map);
+        }
+    } else if (dnf_handler.IsRunning()) {
+        dnf_handler.Reset();
     }
 }
 
@@ -168,7 +174,7 @@ void Render()
             windowFlags |= UI::WindowFlags::NoInputs;
         }
 
-        UI::Begin("Run History", windowFlags);
+        UI::Begin(TEXT_PLUGIN_NAME, windowFlags);
         
         if(!settingWindowLockPosition) {
             settingWindowAnchor = UI::GetWindowPos();
@@ -396,6 +402,8 @@ void UpdateCurrentTarget()
 Target@ GetDefaultTarget()
 {
     switch (settingDefaultTarget) {
+        case DefaultTargetMedalOptions::wr:
+            return @wr;
 #if DEPENDENCY_CHAMPIONMEDALS
         case DefaultTargetMedalOptions::champion:
             if (champion.hasTime()) {
@@ -430,6 +438,7 @@ Target@ GetHardestMedalBeaten(int time)
         author,
         warrior,
         champion,
+        wr
     };
 
     Target @newTarget = @no_medal;
@@ -503,6 +512,7 @@ void OnMapChange(CGameCtnChallenge@ map)
     champion.time = 0;
     warrior.time = 0;
     custom.time = 0;
+    wr.time = 0;
     pb.time = 0;
 
     grind_time_start = Time::Now;
@@ -520,6 +530,13 @@ void OnMapChange(CGameCtnChallenge@ map)
     startnew(function() {
         UpdateCustomMedalTime(pb, function() { return GetPBTime(); });
     });
+    
+    if (setting_add_wr_as_target)
+    {
+        startnew(function() {
+            UpdateCustomMedalTime(wr, function() { return Nadeo::GetMapWorldRecord(activeMapId); });
+        });
+    }
     
 #if DEPENDENCY_CHAMPIONMEDALS
     startnew(function() {

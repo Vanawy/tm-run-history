@@ -1,5 +1,9 @@
 // Texts
+#if SIG_DEVELOPER
+const string TEXT_PLUGIN_NAME = "Run History DEV";
+#else
 const string TEXT_PLUGIN_NAME = "Run History";
+#endif
 const string TEXT_DEFAULT_TARGET = "Default (closest target)";
 const string TEXT_CLEAR = "Clear history";
 const string TEXT_CHANGE = "Change target";
@@ -21,6 +25,7 @@ const string ICON_MENU = Icons::ListOl;
 const string ICON_RESPAWN = Icons::Refresh;
 const string ICON_DNF = Icons::Repeat;
 const string ICON_GRIND_TIME = Icons::ClockO;
+const string ICON_TROPHY = Icons::Trophy;
 
 // Default values
 const string DEFAULT_DELTAS = '500|100';
@@ -37,6 +42,7 @@ const string COLOR_GOLD     = "\\$db4";
 const string COLOR_AUTHOR   = "\\$071";
 const string COLOR_CHAMPION = "\\$f69";
 const string COLOR_WARRIOR  = "\\$3cf";
+const string COLOR_WR       = "\\$ff3";
 const string COLOR_NO_MEDAL = "\\$555";
 
 // other
